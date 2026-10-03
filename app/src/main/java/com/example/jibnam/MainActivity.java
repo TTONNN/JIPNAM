@@ -16,6 +16,11 @@ public class MainActivity extends AppCompatActivity {
         text.setTextSize(30);
         text.setGravity(Gravity.CENTER);
 
+
+
+
+
+
         setContentView(text);
     }
 }
