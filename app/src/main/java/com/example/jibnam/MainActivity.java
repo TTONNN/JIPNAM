@@ -12,7 +12,7 @@ public class MainActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
 
         TextView text = new TextView(this);
-        text.setText("Hello \n puch by five test test");
+        text.setText("Hello1");
         text.setTextSize(30);
         text.setGravity(Gravity.CENTER);
 
