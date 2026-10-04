@@ -1,12 +1,12 @@
 package com.example.jibnam;
 
-public class Ueser {
+public class User {
         private double weight ;
         private String timeWakeUp ;
         private String timeSleep ;
         private double waterLit ;
 
-        public Ueser (double weight , String timeWakeUp , String timeSleep , double waterLit )
+        public User(double weight , String timeWakeUp , String timeSleep , double waterLit )
         {
             setTimeSleep(timeSleep);
             setTimeWakeUp(timeWakeUp);
