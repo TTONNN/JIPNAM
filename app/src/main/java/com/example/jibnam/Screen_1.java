@@ -5,6 +5,7 @@ import android.os.Bundle;
 import android.graphics.Color;
 import android.graphics.Typeface;
 import android.graphics.drawable.GradientDrawable;
+import android.text.InputType;
 import android.view.Gravity;
 import android.view.View;
 import android.view.ViewGroup;
@@ -49,19 +50,11 @@ public class Screen_1 extends Activity {
         // =========================
         // รูปขวดน้ำ
         // =========================
-
+        // ใช้รูป bottle ที่อยู่ใน res/drawable
+        // เรียกใช้ผ่าน R โดยตรง
+        int imageId = R.drawable.bottle;
         ImageView waterBottle = new ImageView(this);
-
-        // ใช้รูป water_bottle ที่อยู่ใน res/drawable
-        int imageId = getResources().getIdentifier(
-                "water_bottle",
-                "drawable",
-                getPackageName()
-        );
-
-        if (imageId != 0) {
-            waterBottle.setImageResource(imageId);
-        }
+        waterBottle.setImageResource(imageId);
 
         waterBottle.setScaleType(ImageView.ScaleType.FIT_CENTER);
 
@@ -111,8 +104,8 @@ public class Screen_1 extends Activity {
         // ช่องน้ำหนัก
         weightInput = createInput("น้ำหนัก");
         weightInput.setInputType(
-                android.text.InputType.TYPE_CLASS_NUMBER |
-                        android.text.InputType.TYPE_NUMBER_FLAG_DECIMAL
+                InputType.TYPE_CLASS_NUMBER |
+                        InputType.TYPE_NUMBER_FLAG_DECIMAL
         );
 
         LinearLayout.LayoutParams weightInputParams =
