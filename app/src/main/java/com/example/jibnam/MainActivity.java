@@ -1,21 +1,12 @@
 package com.example.jibnam;
 
-import android.os.Bundle;
-import androidx.appcompat.app.AppCompatActivity;
-import android.widget.TextView;
-import android.view.Gravity;
-
-public class MainActivity extends AppCompatActivity {
+public class MainActivity extends BaseClass {
 
     @Override
-    protected void onCreate(Bundle savedInstanceState) {
-        super.onCreate(savedInstanceState);
+    void build(Box pg) {
+        add(pg, txt("Hello1", 30, C_BLK, false));
 
-        TextView text = new TextView(this);
-        text.setText("Hello1");
-        text.setTextSize(30);
-        text.setGravity(Gravity.CENTER);
-
-        setContentView(text);
+        // ชั่วคราว: เปิด Screen_2 ทันทีเพื่อดูผล (ลบได้เมื่อมีปุ่มเปลี่ยนหน้าจริง)
+        go(Screen_2.class);
     }
 }
