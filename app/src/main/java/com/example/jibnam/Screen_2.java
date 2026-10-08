@@ -24,6 +24,26 @@ public class Screen_2 extends BaseClass {
 
     @Override
     void build(Box pg) {
+        // ===== ทดสอบเปลี่ยนหน้า (เพิ่มชั่วคราว) =====
+        add(pg, txt("นี่คือ Screen_2", 24, C_BLK, true));
+        Txt toScreen1 = btn("ไป Screen_1", C_BLU, C_WHT);
+        onTap(toScreen1, () -> go(Screen_1.class));
+        add(pg, toScreen1, FILL, 48);
+        mar(toScreen1, 0, 12, 0, 0);
+        Txt toScreen3 = btn("ไป Screen_3", C_BLU, C_WHT);
+        onTap(toScreen3, () -> go(Screen_3.class));
+        add(pg, toScreen3, FILL, 48);
+        mar(toScreen3, 0, 12, 0, 0);
+        Txt toScreen4 = btn("ไป Screen_4", C_BLU, C_WHT);
+        onTap(toScreen4, () -> go(Screen_4.class));
+        add(pg, toScreen4, FILL, 48);
+        mar(toScreen4, 0, 12, 0, 0);
+        Txt toScreen5 = btn("ไป Screen_5", C_BLU, C_WHT);
+        onTap(toScreen5, () -> go(Screen_5.class));
+        add(pg, toScreen5, FILL, 48);
+        mar(toScreen5, 0, 12, 0, 0);
+        // ===== จบส่วนทดสอบ =====
+
         // ดินสอขวาบน (ยังไม่ทำอะไร)
         Box r_Top = row();
         alg(r_Top, A_R);
