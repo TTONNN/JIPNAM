@@ -5,9 +5,9 @@ public class Screen_6 extends BaseClass {
 
     @Override
     void build(Box pg) {
-        add(pg, plainTxt("Screen_6"));
-        Btn toScreen4 = plainBtn("ไป Screen_4");
-        onTap(toScreen4, () -> go(Screen_4.class));
-        add(pg, toScreen4, WRAP, WRAP);
+        add(pg, txt("Screen_6"));
+        Btn toScreen2 = btn("ไป Screen_2");
+        onTap(toScreen2, () -> go(Screen_2.class));
+        add(pg, toScreen2, WRAP, WRAP);
     }
 }

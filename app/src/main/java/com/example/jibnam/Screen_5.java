@@ -5,8 +5,8 @@ public class Screen_5 extends BaseClass {
 
     @Override
     void build(Box pg) {
-        add(pg, plainTxt("Screen_5"));
-        Btn toScreen2 = plainBtn("ไป Screen_2");
+        add(pg, txt("Screen_5"));
+        Btn toScreen2 = btn("ไป Screen_2");
         onTap(toScreen2, () -> go(Screen_2.class));
         add(pg, toScreen2, WRAP, WRAP);
     }
