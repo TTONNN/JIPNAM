@@ -1,69 +1,123 @@
+
 package com.example.jibnam;
 
-import android.content.ContentValues;
 import android.content.Context;
-import android.database.Cursor;
-import android.database.sqlite.SQLiteDatabase;
-import android.database.sqlite.SQLiteOpenHelper;
+import java.io.Serializable;
+
+import java.io.FileInputStream;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.io.ObjectInputStream;
+import java.io.ObjectOutputStream;
 import java.util.ArrayList;
 import java.util.List;
 
-public class Data extends SQLiteOpenHelper {
+public class Data {
 
-    private static final String DATABASE_NAME = "Jibnam.db";
-    private static final int DATABASE_VERSION = 1;
+    // ชื่อไฟล์ที่ใช้เก็บข้อมูล
+    private String fileName;
 
-    public static final String TABLE_NAME = "water_logs";
-    public static final String COLUMN_ID = "id";
-    public static final String COLUMN_AMOUNT = "amount";
-    public static final String COLUMN_TIME = "time";
+    // Context สำหรับเข้าถึงไฟล์ภายในแอป
+    private Context context;
 
-    public Data(Context context) {
-        super(context, DATABASE_NAME, null, DATABASE_VERSION);
+    // Constructor
+    public Data(Context context, String fileName) {
+        this.context = context;
+        this.fileName = fileName;
     }
 
-    @Override
-    public void onCreate(SQLiteDatabase db) {
-        String CREATE_TABLE = "CREATE TABLE " + TABLE_NAME + " (" +
-                COLUMN_ID + " INTEGER PRIMARY KEY AUTOINCREMENT, " +
-                COLUMN_AMOUNT + " INTEGER, " +
-                COLUMN_TIME + " TEXT)";
-        db.execSQL(CREATE_TABLE);
-    }
+    // บันทึกข้อมูล
+    public void saveData(DayRecord record) {
+        List<DayRecord> list = loadData();
 
-    @Override
-    public void onUpgrade(SQLiteDatabase db, int oldVersion, int newVersion) {
-        db.execSQL("DROP TABLE IF EXISTS " + TABLE_NAME);
-        onCreate(db);
-    }
+        // ถ้ามีข้อมูลวันที่นี้อยู่แล้ว ให้แทนที่ข้อมูลเดิม
+        list.removeIf(item ->
+                item.getDate().equals(record.getDate())
+        );
 
-    // เพิ่มข้อมูล
-    public boolean insertWaterLog(WaterLog log) {
-        SQLiteDatabase db = this.getWritableDatabase();
-        ContentValues cv = new ContentValues();
-        cv.put(COLUMN_AMOUNT, log.getAmount());
-        cv.put(COLUMN_TIME, log.getTime());
+        list.add(record);
 
-        long result = db.insert(TABLE_NAME, null, cv);
-        return result != -1;
-    }
+        try (FileOutputStream fos =
+                     context.openFileOutput(fileName, Context.MODE_PRIVATE);
+             ObjectOutputStream oos =
+                     new ObjectOutputStream(fos)) {
 
-    // ดึงประวัติทั้งหมด
-    public List<WaterLog> getAllLogs() {
-        List<WaterLog> logList = new ArrayList<>();
-        SQLiteDatabase db = this.getReadableDatabase();
-        Cursor cursor = db.rawQuery("SELECT * FROM " + TABLE_NAME + " ORDER BY " + COLUMN_ID + " DESC", null);
+            oos.writeObject(new ArrayList<>(list));
 
-        if (cursor.moveToFirst()) {
-            do {
-                int id = cursor.getInt(cursor.getColumnIndexOrThrow(COLUMN_ID));
-                int amount = cursor.getInt(cursor.getColumnIndexOrThrow(COLUMN_AMOUNT));
-                String time = cursor.getString(cursor.getColumnIndexOrThrow(COLUMN_TIME));
-
-                logList.add(new WaterLog(id, amount, time));
-            } while (cursor.moveToNext());
+        } catch (IOException e) {
+            e.printStackTrace();
         }
-        cursor.close();
-        return logList;
+    }
+
+    // อ่านข้อมูลทั้งหมด
+    @SuppressWarnings("unchecked")
+    public List<DayRecord> loadData() {
+        List<DayRecord> list = new ArrayList<>();
+
+        try (FileInputStream fis =
+                     context.openFileInput(fileName);
+             ObjectInputStream ois =
+                     new ObjectInputStream(fis)) {
+
+            list = (List<DayRecord>) ois.readObject();
+
+        } catch (IOException | ClassNotFoundException e) {
+            // ถ้ายังไม่มีไฟล์ ให้คืนรายการว่าง
+        }
+
+        return list;
+    }
+
+    // ดึงข้อมูลรายวัน
+    public DayRecord getDay(String date) {
+        for (DayRecord record : loadData()) {
+            if (record.getDate().equals(date)) {
+                return record;
+            }
+        }
+
+        return null;
+    }
+
+    // ดึงข้อมูลรายเดือน
+    public List<DayRecord> getMonth(int month, int year) {
+        List<DayRecord> result = new ArrayList<>();
+
+        for (DayRecord record : loadData()) {
+            String[] parts = record.getDate().split("-");
+
+            if (parts.length != 3) {
+                continue;
+            }
+
+            int recordYear = Integer.parseInt(parts[0]);
+            int recordMonth = Integer.parseInt(parts[1]);
+
+            if (recordMonth == month && recordYear == year) {
+                result.add(record);
+            }
+        }
+
+        return result;
+    }
+
+    // ลบข้อมูลของวันที่กำหนด
+    public void deleteData(String date) {
+        List<DayRecord> list = loadData();
+
+        list.removeIf(record ->
+                record.getDate().equals(date)
+        );
+
+        try (FileOutputStream fos =
+                     context.openFileOutput(fileName, Context.MODE_PRIVATE);
+             ObjectOutputStream oos =
+                     new ObjectOutputStream(fos)) {
+
+            oos.writeObject(new ArrayList<>(list));
+
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
     }
 }
