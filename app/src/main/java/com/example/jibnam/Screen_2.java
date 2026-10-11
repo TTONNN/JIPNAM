@@ -3,10 +3,10 @@ package com.example.jibnam;
 /** Screen_2 : หน้าบันทึกดื่มน้ำ — หน้าจอใช้เมธอดจาก BaseClass, คำนวณใน WaterLogic (ไม่มี import android) */
 public class Screen_2 extends BaseClass {
 
-    WaterLogic wl = new WaterLogic(System.currentTimeMillis());
+    WaterLogic wl = new WaterLogic();
     int cup_Sel = 0;          // ภาชนะที่เลือก
-    boolean cup_Opn = false;  // รายการภาชนะกางอยู่ไหม
     String unit = "ml";       // หน่วยช่องกรอก
+    static final int CUP_W = 140;   // ความกว้างปุ่มภาชนะ (dp) พอดีคำยาวสุด "ขวดใหญ่ 1.5 L"
 
     // รูปขวด 0%..100% (res/drawable/bottle_0 .. bottle_100)
     static final int[] BTL = {
@@ -15,7 +15,7 @@ public class Screen_2 extends BaseClass {
             R.drawable.bottle_80, R.drawable.bottle_90, R.drawable.bottle_100,
     };
 
-    Txt tv_Add, tv_Drk, tv_Unit;   // +x L, 0.6 / 2.1 L, หน่วย
+    Txt tv_Add, tv_Drk, tv_Unit, tv_Pct;   // +x L, 0.6 / 2.1 L, หน่วย, % บนขวด
     Img iv_Btl;                    // รูปขวด
     Inp et_Amt;                    // ช่องกรอก
     Box ll_Cup, ll_His;            // กล่องภาชนะ, กล่องประวัติ
@@ -25,97 +25,69 @@ public class Screen_2 extends BaseClass {
     @Override
     void build(Box pg) {
         // ===== ทดสอบเปลี่ยนหน้า (เพิ่มชั่วคราว) =====
-        add(pg, txt("นี่คือ Screen_2", 24, C_BLK, true));
-        Txt toScreen1 = btn("ไป Screen_1", C_BLU, C_WHT);
+        add(pg, plainTxt("Screen_2"));
+        Btn toScreen1 = plainBtn("ไป Screen_1");
         onTap(toScreen1, () -> go(Screen_1.class));
-        add(pg, toScreen1, FILL, 48);
-        mar(toScreen1, 0, 12, 0, 0);
-        Txt toScreen3 = btn("ไป Screen_3", C_BLU, C_WHT);
-        onTap(toScreen3, () -> go(Screen_3.class));
-        add(pg, toScreen3, FILL, 48);
-        mar(toScreen3, 0, 12, 0, 0);
-        Txt toScreen4 = btn("ไป Screen_4", C_BLU, C_WHT);
-        onTap(toScreen4, () -> go(Screen_4.class));
-        add(pg, toScreen4, FILL, 48);
-        mar(toScreen4, 0, 12, 0, 0);
-        Txt toScreen5 = btn("ไป Screen_5", C_BLU, C_WHT);
-        onTap(toScreen5, () -> go(Screen_5.class));
-        add(pg, toScreen5, FILL, 48);
-        mar(toScreen5, 0, 12, 0, 0);
+        add(pg, toScreen1, WRAP, WRAP);
         // ===== จบส่วนทดสอบ =====
 
-        // ดินสอขวาบน (ยังไม่ทำอะไร)
-        Box r_Top = row();
-        alg(r_Top, A_R);
-        Txt b_Ed = txt("✎", 26, C_BLK, false);
-        bg(b_Ed, C_WHT, 12, 0, 0);
-        add(r_Top, b_Ed, 52, 52);
-        add(pg, r_Top);
-
         // ข้อมูลด้านบน
-        add(pg, txt("น้ำหนักตัว " + WaterLogic.fmt(wl.wt_Kg), 22, C_BLK, true));
-        add(pg, txt("ปริมาณน้ำที่ควรดื่ม", 22, C_BLK, true));
-        add(pg, txt(WaterLogic.fmt(wl.tg_L) + " L", 22, C_BLK, true));
-        tv_Add = txt("", 26, C_GRN, true);
+        add(pg, plainTxt("น้ำหนักตัว " + WaterLogic.fmt(wl.wt_Kg)));
+        add(pg, plainTxt("ปริมาณน้ำที่ควรดื่ม " + WaterLogic.fmt(wl.tg_L) + " L"));
+        tv_Add = plainTxt("");
         show(tv_Add, false);
         add(pg, tv_Add);
-        tv_Drk = txt("", 24, C_BLK, true);
+        tv_Drk = plainTxt("");
         add(pg, tv_Drk);
 
-        // รูปขวด
+        // รูปขวด + % ทับตรงกลาง
+        Stack st_Btl = stack();
         iv_Btl = img();
-        add(pg, iv_Btl, 130, 180);
-        mar(iv_Btl, 0, 12, 0, 16);
+        addFill(st_Btl, iv_Btl);
+        tv_Pct = plainTxt("");
+        addCenter(st_Btl, tv_Pct);
+        add(pg, st_Btl, 130, 180);
 
-        // แถวกลาง: ภาชนะ | ช่องกรอก + submit | ออกกำลังกาย
-        Box r_Mid = row();
+        // ภาชนะ: 2 แถว แถวละ 2 ปุ่ม ขนาดเท่ากัน อยู่กลางจอ
         ll_Cup = col();
-        addW(r_Mid, ll_Cup, 1.1f);
+        add(pg, ll_Cup);
 
-        Box c_Mid = col();
-        alg(c_Mid, A_CH);
-        addW(r_Mid, c_Mid, 1.2f);
-        mar(c_Mid, 8, 0, 8, 0);
+        // ช่องกรอก + หน่วย อยู่ตรงกลาง
+        Box r_Inp = row();
+        et_Amt = plainNumInp();
+        alg(et_Amt, A_C);
+        add(r_Inp, et_Amt, 120, WRAP);
+        tv_Unit = plainTxt(unit);
+        add(r_Inp, tv_Unit);
+        add(pg, r_Inp, WRAP, WRAP);
 
-        Box b_Inp = row();
-        alg(b_Inp, A_CV);
-        pad(b_Inp, 10, 0, 10, 0);
-        bg(b_Inp, C_WHT, 10, 3, C_BLK);
-        et_Amt = numInp(22);
-        addW(b_Inp, et_Amt, 1f);
-        tv_Unit = txt(unit, 22, C_BLK, true);
-        pad(tv_Unit, 6, 0, 0, 0);
-        add(b_Inp, tv_Unit);
-        add(c_Mid, b_Inp, FILL, 56);
-
-        Txt b_Sub = txt("submit", 18, C_WHT, true);
-        bg(b_Sub, C_BLK, 28, 0, 0);
+        Btn b_Sub = plainBtn("submit");
         onTap(b_Sub, this::submit);
-        add(c_Mid, b_Sub, 110, 48);
-        mar(b_Sub, 0, 14, 0, 0);
+        add(pg, b_Sub, WRAP, WRAP);
 
-        Txt b_Ex = txt("ออกกำลังกาย", 13, C_BLK, true);   // ยังไม่ทำอะไร
-        bg(b_Ex, C_LBL, 48, 0, 0);
-        add(r_Mid, b_Ex, 96, 96);
-        add(pg, r_Mid);
+        // ออกกำลังกาย: ชิดขวา ตรงกับ Read More ด้านล่าง
+        Box r_Ex = row();
+        alg(r_Ex, A_R);
+        Btn b_Ex = plainBtn("ออกกำลังกาย");
+        onTap(b_Ex, () -> go(Screen_3.class));
+        add(r_Ex, b_Ex);
+        add(pg, r_Ex);
 
-        // หัวข้อประวัติ + Read More (ยังไม่ทำอะไร)
+        // ประวัติ: หัวข้อซ้าย, Read More ขวาสุด แถวเดียวกัน
         Box r_His = row();
         alg(r_His, A_CV);
-        pad(r_His, 0, 24, 0, 4);
-        Txt t_His = txt("ประวัติ (วันนี้)", 20, C_BLK, true);
-        alg(t_His, A_L);
-        addW(r_His, t_His, 1f);
-        Txt b_More = txt("Read More", 13, C_DGY, true);
-        bg(b_More, C_WHT, 16, 0, 0);
-        pad(b_More, 14, 6, 14, 6);
+        addW(r_His, plainTxt("ประวัติ (วันนี้)"), 1f);
+        Btn b_More = plainBtn("Read More");
+        onTap(b_More, () -> go(Screen_4.class));
         add(r_His, b_More);
         add(pg, r_His);
 
         ll_His = col();
         add(pg, ll_His);
 
+        SampleHistory.addTo(wl, System.currentTimeMillis());   // ข้อมูลตัวอย่าง: ลบบรรทัดนี้เมื่อมีข้อมูลจริง
         drawCup();
+        setTxt(et_Amt, WaterLogic.CUPS[cup_Sel][1]);
         refresh();
     }
 
@@ -139,60 +111,53 @@ public class Screen_2 extends BaseClass {
 
     // อัปเดตตัวเลข รูปขวด และประวัติ
     void refresh() {
-        setTxt(tv_Drk, WaterLogic.fmt(wl.dk_L) + " / " + WaterLogic.fmt(wl.tg_L) + " L");
-        setImg(iv_Btl, BTL[wl.pct() / 10]);
+        setTxt(tv_Drk, "ดื่มแล้ว " + WaterLogic.fmt(wl.drankL()) + " / " + WaterLogic.fmt(wl.tg_L) + " L");
+        setImg(iv_Btl, BTL[wl.pct() / 10]);   // รูปเปลี่ยนทีละ 10%
+        setTxt(tv_Pct, wl.pctTxt());           // ตัวเลขละเอียด ทศนิยม 2 ตำแหน่ง
         clr(ll_His);
         long now = System.currentTimeMillis();
-        for (WaterLogic.Ent e : wl.his) card(WaterLogic.mlTxt(e.l), WaterLogic.ago(e.t, now));
-    }
-
-    // ปุ่มภาชนะ: ตัวที่เลือกอยู่บน (ฟ้า) ถ้ากางอยู่โชว์อีก 3 ตัว
-    void drawCup() {
-        clr(ll_Cup);
-        cupBtn(cup_Sel, true);
-        if (cup_Opn) {
-            for (int i = 0; i < WaterLogic.CUPS.length; i++) {
-                if (i != cup_Sel) cupBtn(i, false);
-            }
+        for (int i = 0; i < wl.his.size(); i++) {
+            WaterLogic.Ent e = wl.his.get(i);
+            card(i, WaterLogic.mlTxt(e.l), WaterLogic.ago(e.t, now));
         }
     }
 
-    void cupBtn(int i, boolean top) {
-        Txt b = txt(WaterLogic.cupLbl(i), 14, top ? C_WHT : C_BLK, true);
-        bg(b, top ? C_BLU : C_WHT, 4, 2, C_BLK);
-        add(ll_Cup, b, FILL, 34);
-        mar(b, 0, 0, 0, 3);
+    // ปุ่มภาชนะ: โชว์ครบทุกอัน แถวละ 2 ปุ่ม กดแล้วเติมปริมาณในช่องกรอก
+    void drawCup() {
+        clr(ll_Cup);
+        Box r = null;
+        for (int i = 0; i < WaterLogic.CUPS.length; i++) {
+            if (i % 2 == 0) {          // ครบ 2 ปุ่ม ขึ้นแถวใหม่
+                r = row();
+                alg(r, A_CH);
+                add(ll_Cup, r);
+            }
+            cupBtn(r, i);
+        }
+    }
+
+    void cupBtn(Box r, int i) {
+        Btn b = plainBtn(WaterLogic.cupLbl(i));
+        add(r, b, CUP_W, WRAP);
         onTap(b, () -> {
-            if (top) cup_Opn = !cup_Opn;              // กดตัวบน = กาง/หุบ
-            else { cup_Sel = i; cup_Opn = false; }    // กดตัวล่าง = เลือก แล้วหุบ
-            unit = WaterLogic.CUPS[cup_Sel][2];
-            setTxt(et_Amt, WaterLogic.CUPS[cup_Sel][1]);
+            cup_Sel = i;
+            unit = WaterLogic.CUPS[i][2];
+            setTxt(et_Amt, WaterLogic.CUPS[i][1]);
             setTxt(tv_Unit, unit);
-            drawCup();
         });
     }
 
-    // บล็อกประวัติ 1 อัน
-    void card(String amt, String ago) {
+    // ประวัติ 1 แถว: กรอบเส้นดำธรรมดา ข้อความซ้าย ปุ่มแก้ไขขวาสุด
+    void card(int i, String amt, String ago) {
         Box c = row();
         alg(c, A_CV);
-        pad(c, 20, 8, 14, 8);
-        bg(c, C_WHT, 18, 0, 0);
-
-        Txt t_Amt = txt(amt, 24, C_BLK, true);
-        alg(t_Amt, A_L);
-        addW(c, t_Amt, 1f);
-
-        Box c_R = col();
-        add(c, c_R, WRAP, FILL);
-        Txt t_Ed = txt("✎", 18, C_DGY, false);   // ยังไม่ทำอะไร
-        alg(t_Ed, A_TR);
-        addW(c_R, t_Ed, 1f);
-        Txt t_Ago = txt(ago, 12, C_BLK, true);
-        alg(t_Ago, A_R);
-        add(c_R, t_Ago);
-
-        add(ll_His, c, FILL, 72);
-        mar(c, 0, 10, 0, 0);
+        bg(c, C_WHT, 0, 1, C_BLK);
+        pad(c, 8, 4, 8, 4);
+        addW(c, plainTxt(amt + "   " + ago), 1f);
+        Btn b_Ed = plainBtn("แก้ไข");
+        onTap(b_Ed, () -> goWith(Screen_5.class, "drinkIndex", String.valueOf(i)));   // ส่งลำดับแก้วไปหน้า 5
+        add(c, b_Ed);
+        add(ll_His, c);
+        mar(c, 0, 4, 0, 0);
     }
 }

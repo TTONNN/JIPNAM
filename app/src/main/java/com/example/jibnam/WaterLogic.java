@@ -10,14 +10,13 @@ public class WaterLogic {
     // ตัวแปรรอรับจากคนอื่น (ตอนนี้ค่าตัวอย่าง)
     public double wt_Kg = 60;   // น้ำหนักตัว
     public double tg_L = 2.1;   // ควรดื่ม (L)
-    public double dk_L = 0.6;   // ดื่มแล้ว (L)
 
     // ภาชนะ { ชื่อ, ปริมาณ, หน่วย } — ตัวแรก = ค่าเริ่มต้น
     public static final String[][] CUPS = {
             {"กรวย", "50", "ml"},
             {"แก้ว", "150", "ml"},
             {"ขวด", "500", "ml"},
-            {"ขวด", "1.5", "L"},
+            {"ขวดใหญ่", "1.5", "L"},
     };
 
     // 1 รายการประวัติ: l = ลิตร, t = เวลาที่ดื่ม (ms)
@@ -29,18 +28,16 @@ public class WaterLogic {
 
     public final List<Ent> his = new ArrayList<>();   // his[0] = ล่าสุด
 
-    public WaterLogic(long now) {   // ประวัติตัวอย่าง 5 อัน
-        his.add(new Ent(0.640, now - min(1, 18)));
-        his.add(new Ent(0.120, now - min(4, 9)));
-        his.add(new Ent(0.050, now - min(18, 18)));
-        his.add(new Ent(0.500, now - min(20, 2)));
-        his.add(new Ent(0.150, now - min(22, 40)));
+    /** ดื่มแล้วกี่ลิตร = รวมทุกแก้วในประวัติ (ประวัติเปลี่ยน ยอดเปลี่ยนตามเอง) */
+    public double drankL() {
+        double sum = 0;
+        for (Ent e : his) sum += e.l;
+        return sum;
     }
 
-    /** กด submit: แปลงเป็น L, บวกยอด, ใส่ประวัติบนสุด → คืนค่าที่เพิ่ม (L) */
+    /** กด submit: แปลงเป็น L, ใส่ประวัติบนสุด → คืนค่าที่เพิ่ม (L) */
     public double add(double v, String u, long now) {
         double l = toL(v, u);
-        dk_L += l;
         his.add(0, new Ent(l, now));
         return l;
     }
@@ -48,8 +45,14 @@ public class WaterLogic {
     /** % ที่ดื่มแล้ว ปัดลงทีละ 10 (0..100) */
     public int pct() {
         if (tg_L <= 0) return 0;
-        int p = (int) Math.floor(dk_L / tg_L * 10 + 1e-9) * 10;
+        int p = (int) Math.floor(drankL() / tg_L * 10 + 1e-9) * 10;
         return Math.max(0, Math.min(100, p));
+    }
+
+    /** % ที่ดื่มแล้วแบบละเอียด ทศนิยม 2 ตำแหน่ง เช่น "30.95%" (เกิน 100 ได้) */
+    public String pctTxt() {
+        double p = tg_L <= 0 ? 0 : drankL() / tg_L * 100;
+        return String.format(Locale.US, "%.2f%%", p);
     }
 
     /** ml → L (ถ้าเป็น L อยู่แล้วไม่แปลง) */
@@ -79,9 +82,5 @@ public class WaterLogic {
     /** "กรวย 50 ml" */
     public static String cupLbl(int i) {
         return CUPS[i][0] + " " + CUPS[i][1] + " " + CUPS[i][2];
-    }
-
-    private static long min(int h, int m) {
-        return (h * 60L + m) * 60000L;
     }
 }

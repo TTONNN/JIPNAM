@@ -22,6 +22,7 @@ import android.view.Gravity;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.EditText;
+import android.widget.FrameLayout;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.ScrollView;
@@ -30,6 +31,7 @@ import android.widget.Toast;
 
 import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.appcompat.widget.AppCompatButton;
 import androidx.appcompat.widget.AppCompatCheckBox;
 import androidx.appcompat.widget.AppCompatEditText;
 import androidx.appcompat.widget.AppCompatImageView;
@@ -83,6 +85,12 @@ public abstract class BaseClass extends AppCompatActivity {
     public static class Chk extends AppCompatCheckBox {     // ช่องติ๊ก
         public Chk(Context c) { super(c); }
     }
+    public static class Btn extends AppCompatButton {       // ปุ่มหน้าตาเริ่มต้นของ Android
+        public Btn(Context c) { super(c); }
+    }
+    public static class Stack extends FrameLayout {         // กล่องวางของซ้อนกัน (เช่น ตัวหนังสือทับรูป)
+        public Stack(Context c) { super(c); }
+    }
 
     /** รับเวลาที่เลือก (ใช้กับ pickTime) */
     public interface OnTime { void set(int h, int m); }
@@ -119,9 +127,8 @@ public abstract class BaseClass extends AppCompatActivity {
         super.onCreate(b);
         ScrollView sv = new ScrollView(this);
         sv.setFillViewport(true);
-        sv.setBackgroundColor(C_BG);
+        sv.setFitsSystemWindows(true);              // ไม่ให้เนื้อหาไปซ้อนใต้แถบสถานะด้านบน
         Box pg = col();
-        pad(pg, 20, 16, 20, 24);
         sv.addView(pg);
         build(pg);
         setContentView(sv);
@@ -152,6 +159,42 @@ public abstract class BaseClass extends AppCompatActivity {
         bg(t, fl, 24, 0, 0);
         pad(t, 16, 10, 16, 10);
         return t;
+    }
+
+    /** ตัวหนังสือธรรมดา หน้าตาเริ่มต้นของ Android ไม่แต่ง */
+    Txt plainTxt(String s) {
+        Txt t = new Txt(this);
+        t.setText(s);
+        return t;
+    }
+
+    /** ช่องกรอกตัวเลขธรรมดา หน้าตาเริ่มต้นของ Android ไม่แต่ง */
+    Inp plainNumInp() {
+        Inp e = new Inp(this);
+        e.setInputType(InputType.TYPE_CLASS_NUMBER | InputType.TYPE_NUMBER_FLAG_DECIMAL);
+        return e;
+    }
+
+    /** กล่องวางของซ้อนกัน */
+    Stack stack() {
+        return new Stack(this);
+    }
+
+    /** วาง v เต็มกล่อง s */
+    void addFill(Stack s, View v) {
+        s.addView(v, new FrameLayout.LayoutParams(FILL, FILL));
+    }
+
+    /** วาง v ไว้กลางกล่อง s (ซ้อนบนของที่ใส่ไว้ก่อน) */
+    void addCenter(Stack s, View v) {
+        s.addView(v, new FrameLayout.LayoutParams(WRAP, WRAP, Gravity.CENTER));
+    }
+
+    /** ปุ่มธรรมดา หน้าตาเริ่มต้นของ Android ไม่แต่ง */
+    Btn plainBtn(String s) {
+        Btn b = new Btn(this);
+        b.setText(s);
+        return b;
     }
 
     /** ช่องกรอกตัวเลข (ทศนิยมได้) */
