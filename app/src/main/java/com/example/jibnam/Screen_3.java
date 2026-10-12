@@ -2,14 +2,13 @@ package com.example.jibnam;
 
 public class Screen_3 extends BaseClass {
 
-    // ===== ตัวแปรเก็บข้อมูล =====
+    // ตัวแปรเก็บระดับการออกกำลังกายและเวลา
     private int level = 0;
     private int timeH = 0;
     private int timeM = 0;
-
     private int waterplus = 0;
 
-    // ===== ตัวแปร UI =====
+    // ตัวแปรเชื่อมกับช่องกรอกและข้อความ
     private Inp hourInput;
     private Inp minuteInput;
     private Txt levelText;
@@ -18,33 +17,33 @@ public class Screen_3 extends BaseClass {
     @Override
     void build(Box pg) {
 
-        // ===== ข้อความแสดงระดับ =====
+        // ===== หัวข้อเลือกระดับการออกกำลังกาย =====
         levelText = txt("เลือกระดับการออกกำลังกาย");
         levelText.setTextSize(18);
-
         alg(levelText, A_C);
+
         add(pg, levelText);
         mar(levelText, 0, 0, 0, 16);
 
-        // ===== ปุ่มน้อย =====
+        // ===== ปุ่มระดับน้อย =====
         Btn lowButton = btn("น้อย");
         add(pg, lowButton, 220, 48);
         alg(lowButton, A_C);
         mar(lowButton, 0, 0, 0, 10);
 
-        // ===== ปุ่มกลาง =====
+        // ===== ปุ่มระดับกลาง =====
         Btn mediumButton = btn("กลาง");
         add(pg, mediumButton, 220, 48);
         alg(mediumButton, A_C);
         mar(mediumButton, 0, 0, 0, 10);
 
-        // ===== ปุ่มมาก =====
+        // ===== ปุ่มระดับมาก =====
         Btn highButton = btn("มาก");
         add(pg, highButton, 220, 48);
         alg(highButton, A_C);
         mar(highButton, 0, 0, 0, 24);
 
-        // ===== เมื่อกดเลือกระดับ =====
+        // เมื่อกดปุ่ม ให้บันทึกระดับ
         onTap(lowButton, () -> {
             level = 1;
             setTxt(levelText, "ระดับการออกกำลังกาย: น้อย");
@@ -60,36 +59,49 @@ public class Screen_3 extends BaseClass {
             setTxt(levelText, "ระดับการออกกำลังกาย: มาก");
         });
 
-        // ===== หัวข้อเวลา =====
+        // ===== หัวข้อเวลาออกกำลังกาย =====
         Txt timeTitle = txt("เวลาออกกำลังกาย");
         timeTitle.setTextSize(18);
-
         alg(timeTitle, A_C);
+
         add(pg, timeTitle);
         mar(timeTitle, 0, 0, 0, 12);
 
         // ===== ช่องกรอกชั่วโมงและนาที =====
-        Box timeRow = row();
-
         hourInput = numInp();
-        hourInput.setHint("ชั่วโมง");
-        hourInput.setSingleLine(true);
-
-        Txt colon = txt(":");
-        colon.setTextSize(22);
-
-
         minuteInput = numInp();
-        minuteInput.setHint("นาที");
-        minuteInput.setSingleLine(true);
 
-        addW(timeRow, hourInput, 1);
-        add(timeRow, colon, 24, 48);
-        addW(timeRow, minuteInput, 1);
+        hourInput.setTextSize(16);
+        minuteInput.setTextSize(16);
 
-        alg(timeRow, A_C);
-        add(pg, timeRow, 260, 52);
-        mar(timeRow, 0, 0, 0, 20);
+        // สร้างข้อความกำกับช่องกรอก
+        Txt hourLabel = txt("ชั่วโมง");
+        Txt minuteLabel = txt("นาที");
+
+        hourLabel.setTextSize(16);
+        minuteLabel.setTextSize(16);
+
+        // ===== แถวชั่วโมง =====
+        Box hourRow = row();
+        hourRow.setGravity(A_C);
+
+        add(hourRow, hourInput, 120, WRAP);
+        add(hourRow, hourLabel, 80, WRAP);
+
+        // ===== แถวนาที =====
+        Box minuteRow = row();
+        minuteRow.setGravity(A_C);
+
+        add(minuteRow, minuteInput, 120, WRAP);
+        add(minuteRow, minuteLabel, 80, WRAP);
+
+        // ===== รวมสองแถวและจัดให้อยู่กึ่งกลาง =====
+        Box timeRow = col();
+        timeRow.setGravity(A_C);
+
+        add(timeRow, hourRow);
+        add(timeRow, minuteRow);
+        add(pg, timeRow);
 
         // ===== ปุ่ม Submit =====
         Btn submitButton = btn("Submit");
@@ -100,29 +112,30 @@ public class Screen_3 extends BaseClass {
         // ===== ข้อความแสดงผล =====
         resultText = txt("");
         resultText.setTextSize(16);
-
         alg(resultText, A_C);
+
         add(pg, resultText);
         mar(resultText, 0, 8, 0, 0);
 
+        // เมื่อกด Submit ให้คำนวณปริมาณน้ำ
         onTap(submitButton, () -> calculateWater());
     }
 
-    // ===== อ่านเวลาและคำนวณ =====
+    // ===== คำนวณปริมาณน้ำที่ต้องดื่มเพิ่ม =====
     private void calculateWater() {
 
         String hourText = getTxt(hourInput).trim();
         String minuteText = getTxt(minuteInput).trim();
 
-        // ไม่กรอกทั้งชั่วโมงและนาที
+        // ตรวจสอบว่ากรอกเวลาอย่างน้อยหนึ่งช่อง
         if (hourText.isEmpty() && minuteText.isEmpty()) {
             setTxt(resultText, "กรุณากรอกเวลา");
             return;
         }
 
         try {
-            // ไม่กรอกช่องไหน ให้ค่านั้นเป็น 0
 
+            // แปลงข้อความเป็นตัวเลข
             if (hourText.isEmpty()) {
                 timeH = 0;
             } else {
@@ -135,41 +148,40 @@ public class Screen_3 extends BaseClass {
                 timeM = Integer.parseInt(minuteText);
             }
 
-            // ตรวจสอบเวลา
+            // ตรวจสอบความถูกต้องของเวลา
             if (timeH < 0 || timeM < 0 || timeM >= 60) {
-                setTxt(resultText,
-                        "กรุณากรอกเวลาให้ถูกต้อง");
+                setTxt(resultText, "กรุณากรอกเวลาให้ถูกต้อง");
                 return;
             }
 
-            // ต้องเลือกระดับก่อนคำนวณ
+            // ตรวจสอบว่าเลือกระดับการออกกำลังกายแล้วหรือยัง
             if (level == 0) {
-                setTxt(resultText,
-                        "กรุณาเลือกระดับการออกกำลังกาย");
+                setTxt(resultText, "กรุณาเลือกระดับการออกกำลังกาย");
                 return;
             }
 
             // คำนวณปริมาณน้ำ
             waterplus = CalWaterPlus(level, timeH, timeM);
 
-            // แสดงผล
-            setTxt(resultText, "\nปริมาณน้ำตามที่ต้องดื่มเพิ่ม: " + waterplus + " ml");
+            setTxt(
+                    resultText, "\nปริมาณน้ำตามที่ต้องดื่มเพิ่มประมาณ " + waterplus + " ml"
+            );
 
         } catch (NumberFormatException e) {
             setTxt(resultText, "กรุณากรอกตัวเลขให้ถูกต้อง");
         }
     }
 
-    // ===== ฟังก์ชันคำนวณปริมาณน้ำ =====
+    // ===== สูตรคำนวณปริมาณน้ำ =====
     private int CalWaterPlus(int level, int timeH, int timeM) {
 
-        // แปลงชั่วโมงเป็นนาทีแล้วรวมกับนาทีที่กรอก
+        // แปลงเวลาเป็นนาทีทั้งหมด
         int totalMinutes = (timeH * 60) + timeM;
 
-        // ระดับ 1 = 5, ระดับ 2 = 10, ระดับ 3 = 15 มล./นาที
+        // อัตราน้ำที่ใช้คำนวณตามระดับ
         int waterRate = level * 5;
 
-        // ปริมาณน้ำที่คำนวณได้
+        // ปริมาณน้ำที่ต้องดื่มเพิ่ม
         int waterplus = waterRate * totalMinutes;
 
         return waterplus;
