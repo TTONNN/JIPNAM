@@ -119,6 +119,15 @@ public class Screen_3 extends BaseClass {
 
         // เมื่อกด Submit ให้คำนวณปริมาณน้ำ
         onTap(submitButton, () -> calculateWater());
+
+        // ===== ปุ่มย้อนกลับไป Screen_2 =====
+        Btn backButton = btn("ย้อนกลับ");
+        add(pg, backButton, 220, 48);
+        alg(backButton, A_C);
+        mar(backButton, 0, 12, 0, 0);
+
+// เมื่อกดปุ่ม ให้กลับไป Screen_2
+        onTap(backButton, () -> go(Screen_2.class));
     }
 
     // ===== คำนวณปริมาณน้ำที่ต้องดื่มเพิ่ม =====
