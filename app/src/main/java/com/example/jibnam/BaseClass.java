@@ -26,12 +26,13 @@ import androidx.appcompat.widget.AppCompatTextView;
 /*
  * BaseClass : คลาสแม่ของทุกหน้าจอ เก็บโค้ด Android ไว้ที่นี่ที่เดียว
  * หน้าลูก extends BaseClass แล้วเขียน build() อย่างเดียว ไม่ต้อง import android
+ * (เมธอดเป็น protected เพื่อให้หน้าในโฟลเดอร์ SCREEN เรียกใช้ได้)
  *
  * สร้าง : txt  btn  numInp  img  col  row  stack
  * วาง   : add  addW  addFill  addMid  mar  pad  alg  border  clr
  * ค่า   : setTxt  getTxt  setImg  show
  * กด    : onTap  later  cancel
- * หน้า  : go  goWith
+ * หน้า  : go  goWith  arg
  */
 public abstract class BaseClass extends AppCompatActivity {
 
@@ -66,7 +67,7 @@ public abstract class BaseClass extends AppCompatActivity {
 
     private final Handler hdl = new Handler(Looper.getMainLooper());      // ตัวจับเวลา ใช้กับ later/cancel
 
-    abstract void build(Box pg);   // หน้าลูกต้องเขียน: สร้างหน้าจอลงใน pg
+    protected abstract void build(Box pg);   // หน้าลูกต้องเขียน: สร้างหน้าจอลงใน pg
 
     @Override
     protected void onCreate(Bundle b) {          // เปิดหน้า: ทำหน้าเลื่อนขึ้นลงได้ แล้วให้หน้าลูก build
@@ -88,141 +89,145 @@ public abstract class BaseClass extends AppCompatActivity {
 
     // ===== สร้างชิ้นส่วน =====
 
-    Txt txt(String s) {                          // ตัวหนังสือ ข้อความ s
+    protected Txt txt(String s) {                          // ตัวหนังสือ ข้อความ s
         Txt t = new Txt(this);
         t.setText(s);
         return t;
     }
 
-    Btn btn(String s) {                          // ปุ่ม ข้อความ s
+    protected Btn btn(String s) {                          // ปุ่ม ข้อความ s
         Btn b = new Btn(this);
         b.setText(s);
         return b;
     }
 
-    Inp numInp() {                               // ช่องกรอกตัวเลข (มีทศนิยมได้)
+    protected Inp numInp() {                               // ช่องกรอกตัวเลข (มีทศนิยมได้)
         Inp e = new Inp(this);
         e.setInputType(InputType.TYPE_CLASS_NUMBER | InputType.TYPE_NUMBER_FLAG_DECIMAL);
         return e;
     }
 
-    Img img() {                                  // ช่องรูป
+    protected Img img() {                                  // ช่องรูป
         return new Img(this);
     }
 
-    Box col() {                                  // กล่องเรียงบนลงล่าง
+    protected Box col() {                                  // กล่องเรียงบนลงล่าง
         Box b = new Box(this);
         b.setOrientation(LinearLayout.VERTICAL);
         return b;
     }
 
-    Box row() {                                  // กล่องเรียงซ้ายไปขวา
+    protected Box row() {                                  // กล่องเรียงซ้ายไปขวา
         Box b = new Box(this);
         b.setOrientation(LinearLayout.HORIZONTAL);
         return b;
     }
 
-    Stack stack() {                              // กล่องวางของซ้อนกัน
+    protected Stack stack() {                              // กล่องวางของซ้อนกัน
         return new Stack(this);
     }
 
     // ===== วางของ =====
 
-    void add(Box p, View v) {                    // ใส่ v ลงกล่อง p ขนาดอัตโนมัติ
+    protected void add(Box p, View v) {                    // ใส่ v ลงกล่อง p ขนาดอัตโนมัติ
         add(p, v, p.getOrientation() == LinearLayout.VERTICAL ? FILL : WRAP, WRAP);
     }
 
-    void add(Box p, View v, int w, int h) {      // ใส่ v ลงกล่อง p กว้าง w สูง h (dp, FILL หรือ WRAP)
+    protected void add(Box p, View v, int w, int h) {      // ใส่ v ลงกล่อง p กว้าง w สูง h (dp, FILL หรือ WRAP)
         LinearLayout.LayoutParams lp = new LinearLayout.LayoutParams(sz(w), sz(h));
         if (p.getOrientation() == LinearLayout.VERTICAL) lp.gravity = A_CH;
         p.addView(v, lp);
     }
 
-    void addW(Box p, View v, float wt) {         // ใส่ v ลงกล่อง p แบ่งที่ว่างตามสัดส่วน wt
+    protected void addW(Box p, View v, float wt) {         // ใส่ v ลงกล่อง p แบ่งที่ว่างตามสัดส่วน wt
         boolean vt = p.getOrientation() == LinearLayout.VERTICAL;
         p.addView(v, new LinearLayout.LayoutParams(vt ? FILL : 0, vt ? 0 : WRAP, wt));
     }
 
-    void addFill(Stack s, View v) {              // วาง v เต็มกล่องซ้อน s
+    protected void addFill(Stack s, View v) {              // วาง v เต็มกล่องซ้อน s
         s.addView(v, new FrameLayout.LayoutParams(FILL, FILL));
     }
 
-    void addMid(Stack s, View v) {               // วาง v กลางกล่องซ้อน s (ทับของที่ใส่ก่อน)
+    protected void addMid(Stack s, View v) {               // วาง v กลางกล่องซ้อน s (ทับของที่ใส่ก่อน)
         s.addView(v, new FrameLayout.LayoutParams(WRAP, WRAP, Gravity.CENTER));
     }
 
-    void mar(View v, int l, int t, int r, int b) {   // ระยะห่างด้านนอก ซ้าย บน ขวา ล่าง (dp) เรียกหลัง add
+    protected void mar(View v, int l, int t, int r, int b) {   // ระยะห่างด้านนอก ซ้าย บน ขวา ล่าง (dp) เรียกหลัง add
         ViewGroup.MarginLayoutParams lp = (ViewGroup.MarginLayoutParams) v.getLayoutParams();
         lp.setMargins(dp(l), dp(t), dp(r), dp(b));
         v.setLayoutParams(lp);
     }
 
-    void pad(View v, int l, int t, int r, int b) {   // ระยะห่างด้านใน ซ้าย บน ขวา ล่าง (dp)
+    protected void pad(View v, int l, int t, int r, int b) {   // ระยะห่างด้านใน ซ้าย บน ขวา ล่าง (dp)
         v.setPadding(dp(l), dp(t), dp(r), dp(b));
     }
 
-    void alg(View v, int a) {                    // จัดตำแหน่งของข้างใน (ใช้ค่า A_xx)
+    protected void alg(View v, int a) {                    // จัดตำแหน่งของข้างใน (ใช้ค่า A_xx)
         if (v instanceof TextView) ((TextView) v).setGravity(a);
         else if (v instanceof LinearLayout) ((LinearLayout) v).setGravity(a);
     }
 
-    void border(View v) {                        // กรอบเส้นดำบาง 1dp พื้นขาว
+    protected void border(View v) {                        // กรอบเส้นดำบาง 1dp พื้นขาว
         GradientDrawable g = new GradientDrawable();
         g.setColor(Color.WHITE);
         g.setStroke(dp(1), Color.BLACK);
         v.setBackground(g);
     }
 
-    void clr(Box b) {                            // ลบของในกล่องทิ้งทั้งหมด (ไว้วาดใหม่)
+    protected void clr(Box b) {                            // ลบของในกล่องทิ้งทั้งหมด (ไว้วาดใหม่)
         b.removeAllViews();
     }
 
     // ===== ค่า =====
 
-    void setTxt(TextView t, String s) {          // เปลี่ยนข้อความ (ใช้กับ Txt และ Inp)
+    protected void setTxt(TextView t, String s) {          // เปลี่ยนข้อความ (ใช้กับ Txt และ Inp)
         t.setText(s);
         if (t instanceof EditText) ((EditText) t).setSelection(s.length());   // ช่องกรอก: เคอร์เซอร์ไปท้ายสุด
     }
 
-    String getTxt(TextView t) {                  // อ่านข้อความ (ตัดช่องว่างหัวท้ายแล้ว)
+    protected String getTxt(TextView t) {                  // อ่านข้อความ (ตัดช่องว่างหัวท้ายแล้ว)
         return t.getText() == null ? "" : t.getText().toString().trim();
     }
 
-    void setImg(Img i, int id) {                 // เปลี่ยนรูป เช่น R.drawable.bottle_0
+    protected void setImg(Img i, int id) {                 // เปลี่ยนรูป เช่น R.drawable.bottle_0
         i.setImageResource(id);
     }
 
-    void show(View v, boolean s) {               // โชว์ / ซ่อน (ซ่อนแต่ยังกันที่ไว้)
+    protected void show(View v, boolean s) {               // โชว์ / ซ่อน (ซ่อนแต่ยังกันที่ไว้)
         v.setVisibility(s ? View.VISIBLE : View.INVISIBLE);
     }
 
     // ===== กด / เวลา =====
 
-    void onTap(View v, Runnable r) {             // กด v แล้วทำ r  เช่น onTap(b, () -> go(Screen_3.class))
+    protected void onTap(View v, Runnable r) {             // กด v แล้วทำ r  เช่น onTap(b, () -> go(Screen_3.class))
         v.setOnClickListener(x -> r.run());
     }
 
-    void later(Runnable r, long ms) {            // ทำ r หลังผ่านไป ms มิลลิวินาที (1000 = 1 วิ)
+    protected void later(Runnable r, long ms) {            // ทำ r หลังผ่านไป ms มิลลิวินาที (1000 = 1 วิ)
         hdl.postDelayed(r, ms);
     }
 
-    void cancel(Runnable r) {                    // ยกเลิก r ที่ตั้งเวลาไว้
+    protected void cancel(Runnable r) {                    // ยกเลิก r ที่ตั้งเวลาไว้
         hdl.removeCallbacks(r);
     }
 
     // ===== เปลี่ยนหน้า =====
 
-    void go(Class<?> c) {                        // เปิดหน้าอื่น เช่น go(Screen_3.class)
+    protected void go(Class<?> c) {                        // เปิดหน้าอื่น เช่น go(Screen_3.class)
         startActivity(new Intent(this, c));
     }
 
-    void goWith(Class<?> c, String k, String v) {   // เปิดหน้าอื่นพร้อมส่งค่า k = ชื่อ, v = ค่า
+    protected void goWith(Class<?> c, String k, String v) {   // เปิดหน้าอื่นพร้อมส่งค่า k = ชื่อ, v = ค่า
         startActivity(new Intent(this, c).putExtra(k, v));
+    }
+
+    protected String arg(String k) {             // อ่านค่าที่หน้าก่อนส่งมากับ goWith (ไม่มี = null)
+        return getIntent().getStringExtra(k);
     }
 
     // ===== ภายใน =====
 
-    int dp(int v) {                              // แปลง dp เป็นพิกเซลของจอนี้
+    protected int dp(int v) {                              // แปลง dp เป็นพิกเซลของจอนี้
         return (int) (v * getResources().getDisplayMetrics().density + 0.5f);
     }
 

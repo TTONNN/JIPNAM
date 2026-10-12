@@ -1,15 +1,20 @@
-package com.example.jibnam;
+package com.example.jibnam.SCREEN;
 
-import java.util.ArrayList;
+import com.example.jibnam.BaseClass;
+import com.example.jibnam.R;
+import com.example.jibnam.WaterCalculate;
+import com.example.jibnam.DATA.Data;
+import com.example.jibnam.DATA.DataApi;
+
 import java.util.List;
 import java.util.Locale;
 
 /** Screen_2 : หน้าหลัก บันทึกดื่มน้ำ — หน้าจอ + ข้อมูล + คำนวณ อยู่ในไฟล์นี้ */
 public class Screen_2 extends BaseClass {
 
-    // ===== ข้อมูล (ตอนนี้ค่าตัวอย่าง) =====
-    double wtKg = 60;                    // น้ำหนักตัว (กก.)
-    double tgL = 2.1;                    // เป้าน้ำที่ควรดื่ม (ลิตร)
+    // ===== ข้อมูล (ดึงจากไฟล์ตอนเปิดหน้า) =====
+    double wtKg;                         // น้ำหนักตัว (กก.) จากบรรทัด U ล่าสุด
+    double tgL;                          // เป้าน้ำที่ควรดื่ม (ลิตร) = WaterCalculate.targetL(wtKg)
     String unit = "ml";                  // หน่วยของช่องกรอก
 
     static final String[][] CUPS = {     // ภาชนะ { ชื่อ, ปริมาณ, หน่วย }
@@ -20,12 +25,8 @@ public class Screen_2 extends BaseClass {
     };
     static final int CUP_W = 140;        // ความกว้างปุ่มภาชนะ (dp) พอดีคำยาวสุด "ขวดใหญ่ 1.5 L"
 
-    static class Ent {                   // แก้วที่ดื่ม 1 แก้ว
-        final double l;                  // ปริมาณ (ลิตร)
-        final long t;                    // เวลาที่ดื่ม (มิลลิวินาที)
-        Ent(double l, long t) { this.l = l; this.t = t; }
-    }
-    List<Ent> his = new ArrayList<>();   // ประวัติวันนี้ his[0] = ล่าสุด
+    Data data;                           // ไฟล์ RealData.txt (ข้อมูลจริงอยู่ในไฟล์ หน้าจอดึงมาโชว์อย่างเดียว)
+    double drkL;                         // ดื่มแล้ววันนี้ (ลิตร) รวมจากไฟล์ทุกครั้งที่ refresh
 
     static final int[] BTL = {           // รูปขวด 0% ถึง 100% ทีละ 10
             R.drawable.bottle_0, R.drawable.bottle_10, R.drawable.bottle_20, R.drawable.bottle_30,
@@ -42,11 +43,12 @@ public class Screen_2 extends BaseClass {
     Inp amtIn;      // ช่องกรอกปริมาณ
     Box cupBox;     // กล่องปุ่มภาชนะ
     Box hisBox;     // กล่องประวัติ
+    Btn notiBtn;    // ปุ่ม การแจ้งเตือน (เปิด)/(ปิด)
 
     Runnable hidePlus = () -> show(plusTx, false);   // ซ่อน "+x L"
 
     @Override
-    void build(Box pg) {
+    protected void build(Box pg) {
         // ปุ่มทดสอบ ไปหน้า 1 และหน้า 6
         add(pg, txt("Screen_2"));
         Btn toS1 = btn("ไป Screen_1");
@@ -55,6 +57,22 @@ public class Screen_2 extends BaseClass {
         Btn toS6 = btn("ไป Screen_6");
         onTap(toS6, () -> go(Screen_6.class));
         add(pg, toS6, WRAP, WRAP);
+
+        // ดึงข้อมูลผู้ใช้จากไฟล์ RealData.txt
+        data = new Data(DataApi.realDataFile(this));
+        if (data.lastUser() == null)                                   // ชั่วคราว: ยังไม่มีข้อมูลผู้ใช้ ใส่ค่าตัวอย่างไว้ก่อน
+            data.saveUser(60, 7, 0, 23, 0);                            //   (ลบได้เมื่อ Screen_1 เซฟข้อมูลผู้ใช้จริง)
+        wtKg = Double.parseDouble(data.lastUser()[2]);
+        tgL = WaterCalculate.targetL(wtKg);
+
+        // ปุ่มแจ้งเตือน: กดสลับ เปิด/ปิด แล้วเซฟลงไฟล์ (ตัวท้ายสุดของบรรทัด D ล่างสุด)
+        notiBtn = btn("");
+        onTap(notiBtn, () -> {
+            data.setNoti(!data.notiOn());
+            showNoti();
+        });
+        add(pg, notiBtn, WRAP, WRAP);
+        showNoti();
 
         // ข้อมูลด้านบน
         add(pg, txt("น้ำหนักตัว " + fmt(wtKg)));
@@ -110,10 +128,6 @@ public class Screen_2 extends BaseClass {
         hisBox = col();
         add(pg, hisBox);
 
-        // ข้อมูลตัวอย่าง: ลบ 2 บรรทัดนี้เมื่อมีข้อมูลจริง
-        long now = System.currentTimeMillis();
-        for (SampleHistory.Drink d : SampleHistory.make(now)) his.add(new Ent(d.l, d.t));
-
         drawCup();
         setTxt(amtIn, CUPS[0][1]);       // เริ่มต้นใส่ปริมาณภาชนะแรก
         refresh();
@@ -121,7 +135,7 @@ public class Screen_2 extends BaseClass {
 
     // ===== หน้าจอ =====
 
-    void submit() {                      // กด submit: เพิ่มแก้ว → อัปเดตหน้า → โชว์ +x L 1 วิ
+    void submit() {                      // กด submit: เขียนลงไฟล์ → ดึงจากไฟล์มาโชว์ใหม่ → โชว์ +x L 1 วิ
         double v;
         try {
             v = Double.parseDouble(getTxt(amtIn));
@@ -131,7 +145,7 @@ public class Screen_2 extends BaseClass {
         if (v <= 0) return;
 
         double l = toL(v, unit);
-        his.add(0, new Ent(l, System.currentTimeMillis()));   // ใส่บนสุดของประวัติ
+        data.addDrink(l, tgL);           // เก็บลงไฟล์ (Data ใส่ serial เวลาตอนนี้ + ยอดดื่มทั้งวันให้เอง)
         refresh();
         setTxt(plusTx, "+" + fmt(l) + " L");
         show(plusTx, true);
@@ -139,16 +153,23 @@ public class Screen_2 extends BaseClass {
         later(hidePlus, 1000);
     }
 
-    void refresh() {                     // อัปเดตยอดดื่ม รูปขวด % และประวัติ
-        setTxt(drankTx, "ดื่มแล้ว " + fmt(drankL()) + " / " + fmt(tgL) + " L");
+    void refresh() {                     // ดึงแก้ววันนี้จากไฟล์ แล้ววาดประวัติ ยอดดื่ม รูปขวด %
+        List<String[]> ds = data.getDrinks(Data.today());          // d = { "D", serial, ลิตร, ชม., นาที, ต้องดื่ม, ดื่มแล้วทั้งวัน, แจ้งเตือน }
+        clr(hisBox);
+        drkL = 0;
+        for (int k = ds.size() - 1; k >= 0; k--) {                 // ท้ายไฟล์ = แก้วล่าสุด อยู่บนสุด
+            String[] d = ds.get(k);
+            double l = Double.parseDouble(d[2]);
+            drkL += l;
+            hisCard(d[1], mlTxt(l) + "   เวลา " + hm(d[3], d[4]));
+        }
+        setTxt(drankTx, "ดื่มแล้ว " + fmt(drkL) + " / " + fmt(tgL) + " L");
         setImg(btlImg, BTL[pct() / 10]);  // รูปเปลี่ยนทีละ 10%
         setTxt(pctTx, pctTxt());          // % ทศนิยม 2 ตำแหน่ง
-        clr(hisBox);
-        long now = System.currentTimeMillis();
-        for (int i = 0; i < his.size(); i++) {
-            Ent e = his.get(i);
-            hisCard(i, mlTxt(e.l) + "   " + ago(e.t, now));
-        }
+    }
+
+    void showNoti() {                    // ข้อความบนปุ่มแจ้งเตือน ดึงจากไฟล์
+        setTxt(notiBtn, "การแจ้งเตือน (" + (data.notiOn() ? "เปิด" : "ปิด") + ")");
     }
 
     void drawCup() {                     // วางปุ่มภาชนะครบทุกอัน แถวละ 2 ปุ่ม
@@ -174,14 +195,24 @@ public class Screen_2 extends BaseClass {
         });
     }
 
-    void hisCard(int i, String s) {      // ประวัติ 1 แถว: กรอบ, ข้อความซ้าย, ปุ่มแก้ไขขวาสุด
+    /*
+     * ปุ่ม "แก้ไข" → ส่ง serial ของแก้วนี้ ไป Screen_5
+     * Screen_5 รับแล้วใช้ต่อ:
+     *   Data data = new Data(DataApi.realDataFile(this));
+     *   String sn = arg("serial");                     // แก้วที่ถูกกดแก้ไข
+     *   String[] d = data.getDrink(sn);                // d[2]=ลิตร  d[3]=ชม.  d[4]=นาที
+     *   data.editDrink(sn, ลิตร, ชม., นาที);           // แก้ = เขียนทับค่าในบรรทัดเดิม
+     *   data.deleteDrink(sn);                          // ลบ = เขียนทับบรรทัดนั้นด้วยบรรทัดว่าง
+     *   go(Screen_2.class);                            // กลับมา Screen_2 จะดึงจากไฟล์ใหม่เอง
+     */
+    void hisCard(String sn, String s) {  // ประวัติ 1 แถว: กรอบ, ข้อความซ้าย, ปุ่มแก้ไขขวาสุด (sn = serial ของแก้ว)
         Box c = row();
         alg(c, A_CV);
         border(c);
         pad(c, 8, 4, 8, 4);
         addW(c, txt(s), 1f);
         Btn edBtn = btn("แก้ไข");
-        onTap(edBtn, () -> goWith(Screen_5.class, "drinkIndex", String.valueOf(i)));   // ส่งลำดับแก้วไปหน้า 5
+        onTap(edBtn, () -> goWith(Screen_5.class, "serial", sn));   // ส่ง serial ไปหน้า 5
         add(c, edBtn);
         add(hisBox, c);
         mar(c, 0, 4, 0, 0);
@@ -189,20 +220,14 @@ public class Screen_2 extends BaseClass {
 
     // ===== คำนวณ =====
 
-    double drankL() {                    // ดื่มแล้วกี่ลิตร = รวมทุกแก้วในประวัติ
-        double sum = 0;
-        for (Ent e : his) sum += e.l;
-        return sum;
-    }
-
     int pct() {                          // % ที่ดื่มแล้ว ปัดลงทีละ 10 (0..100) ไว้เลือกรูปขวด
         if (tgL <= 0) return 0;
-        int p = (int) Math.floor(drankL() / tgL * 10 + 1e-9) * 10;
+        int p = (int) Math.floor(drkL / tgL * 10 + 1e-9) * 10;
         return Math.max(0, Math.min(100, p));
     }
 
     String pctTxt() {                    // % แบบละเอียด ทศนิยม 2 ตำแหน่ง เช่น "52.38%"
-        double p = tgL <= 0 ? 0 : drankL() / tgL * 100;
+        double p = tgL <= 0 ? 0 : drkL / tgL * 100;
         return String.format(Locale.US, "%.2f%%", p);
     }
 
@@ -223,9 +248,8 @@ public class Screen_2 extends BaseClass {
         return Math.round(l * 1000) + " ml";
     }
 
-    static String ago(long t, long now) {   // ผ่านมานานแค่ไหน → "1 ชั่วโมง 18 นาที"
-        long m = Math.max(0, (now - t) / 60000);
-        return (m / 60) + " ชั่วโมง " + String.format(Locale.US, "%02d", m % 60) + " นาที";
+    static String hm(String h, String m) {   // "9","5" → "09:05"
+        return String.format(Locale.US, "%02d:%02d", Integer.parseInt(h), Integer.parseInt(m));
     }
 
     static String cupLbl(int i) {        // ชื่อบนปุ่มภาชนะ เช่น "กรวย 50 ml"
