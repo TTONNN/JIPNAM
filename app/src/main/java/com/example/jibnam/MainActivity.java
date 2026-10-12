@@ -9,4 +9,6 @@ public class MainActivity extends BaseClass {
         // ชั่วคราว: เปิด Screen_2 ทันทีเพื่อดูผล (ลบได้เมื่อมีปุ่มเปลี่ยนหน้าจริง)
         go(Screen_2.class);
     }
+
+
 }
