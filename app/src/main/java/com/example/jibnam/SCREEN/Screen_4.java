@@ -1,6 +1,6 @@
 package com.example.jibnam.SCREEN;
 
-import com.example.jibnam.BaseClass;
+import com.example.jibnam.CODE.BaseClass;
 
 /** Screen_4 : ตอนนี้มีแค่ชื่อหน้า + ปุ่มเปลี่ยนหน้า (ไว้ทดสอบ) */
 public class Screen_4 extends BaseClass {

@@ -1,8 +1,8 @@
 package com.example.jibnam.SCREEN;
 
-import com.example.jibnam.BaseClass;
+import com.example.jibnam.CODE.BaseClass;
 import com.example.jibnam.R;
-import com.example.jibnam.WaterCalculate;
+import com.example.jibnam.CODE.WaterCalculate;
 import com.example.jibnam.DATA.Data;
 import com.example.jibnam.DATA.DataApi;
 
