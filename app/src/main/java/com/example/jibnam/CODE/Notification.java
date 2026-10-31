@@ -17,7 +17,7 @@ import java.util.List;
 
 /*
  * Notification : เตือนดื่มน้ำ
- *   เอาเวลาตื่น - นอน (บรรทัด U ล่าสุด) แบ่งเท่าๆ กัน 5 ช่วง
+ *   เอาเวลาตื่น - นอน (บรรทัด U ล่าสุด) แบ่ง 5 ช่วง ตามสัดส่วน RATIO (เหมือน Screen_6)
  *   ทุกครั้งที่จบ 1 ช่วง ระบบจะปลุก onReceive → check() → ถ้ามีข้อความ ก็เด้งแจ้งเตือน → ตั้งปลุกรอบถัดไป
  *
  *   check() คิดแบบนี้ (เรียงตามลำดับ)
@@ -43,6 +43,7 @@ public class Notification extends BroadcastReceiver {
     static final String BACK = "อย่าลืมดื่มน้ำและบันทึกข้อมูลของคุณด้วยนะ";    // หายไปทั้งวัน
     static final int[] BACK_DAYS = {1, 3, 7, 14, 28};                    // หายไปวันที่เท่าไหร่ถึงเตือน
     static final double OVER_X = 1.5;                                    // ดื่มเกินเป้ากี่เท่า = มากเกินไป
+    static final double[] RATIO = {0.15, 0.275, 0.275, 0.15, 0.15};      // สัดส่วน 5 ช่วง (ต้องตรงกับ ratio ใน Screen_6)
 
     public static String[] allMsgs() {              // ข้อความทุกแบบ (ไว้ปุ่มทดสอบใน Screen_2 วนดู)
         return new String[]{
@@ -101,8 +102,16 @@ public class Notification extends BroadcastReceiver {
         int wake = Integer.parseInt(u[3]) * 60 + Integer.parseInt(u[4]);
         int sleep = Integer.parseInt(u[5]) * 60 + Integer.parseInt(u[6]);
         if (sleep <= wake) sleep += 24 * 60;                          // นอนหลังเที่ยงคืน
-        int len = (sleep - wake) / 5;                                // 1 ช่วงยาวกี่นาที
-        return new int[]{wake, wake + len, wake + len * 2, wake + len * 3, wake + len * 4, sleep};
+        int total = sleep - wake;                                    // ตื่นอยู่กี่นาที
+        int[] b = new int[6];
+        b[0] = wake;
+        double acc = 0;
+        for (int i = 0; i < 5; i++) {
+            acc += RATIO[i];                                         // สัดส่วนสะสม 0.15, 0.425, 0.7, 0.85, 1.0
+            b[i + 1] = wake + (int) Math.round(total * acc);
+        }
+        b[5] = sleep;
+        return b;
     }
 
     static int awayDays(Data data, String today) {  // หายไปกี่วันเต็ม (0 = เมื่อวาน/วันนี้ยังบันทึกอยู่)

@@ -22,15 +22,17 @@ public class Screen_1 extends BaseClass {
         // ชื่อแอป
         Txt title = txt("JIBNAM");
         title.setTextSize(48);
+        bold(title);
         centerX(pg, title, 0, 0, WRAP, WRAP);
 
         // น้ำหนักตัว
         Txt weightLabel = txt("น้ำหนักตัว (กิโลกรัม)");
         weightLabel.setTextSize(20);
+        bold(weightLabel);
         centerX(pg, weightLabel, 0, 220, WRAP, WRAP);
 
         weightInput = numInp();
-        centerX(pg, weightInput, 0, 300, WRAP, WRAP);
+        centerX(pg, weightInput, 0, 300, 360, WRAP);          // กว้าง 360 เหมือนช่องกรอกใน Screen_2
 
         // ปุ่มคำนวณ
         Btn calculateButton = btn("คำนวณ");
@@ -42,17 +44,19 @@ public class Screen_1 extends BaseClass {
         // แสดงปริมาณน้ำที่แนะนำ
         targetDrinkText = txt("ปริมาณน้ำที่แนะนำจะแสดงที่นี่");
         targetDrinkText.setTextSize(20);
+        bold(targetDrinkText);
         centerX(pg, targetDrinkText, 0, 650, WRAP, WRAP);
         // เวลาตื่นนอน
 
         Txt wakeLabel = txt("เวลาตื่นนอน");
         wakeLabel.setTextSize(20);
+        bold(wakeLabel);
         centerX(pg, wakeLabel, 0, 800, WRAP, WRAP);
 
         // ชั่วโมงตื่นนอน
         wakeHourInput = numInp();
         wakeHourInput.setInputType(android.text.InputType.TYPE_CLASS_NUMBER);
-        put(pg, wakeHourInput, 250, 1000, WRAP, WRAP);
+        put(pg, wakeHourInput, 250, 1000, 140, WRAP);
 
 
         Txt wakeHourText = txt("ชั่วโมง");
@@ -62,7 +66,7 @@ public class Screen_1 extends BaseClass {
         // นาทีตื่นนอน
         wakeMinuteInput = numInp();
         wakeMinuteInput.setInputType(android.text.InputType.TYPE_CLASS_NUMBER);
-        put(pg, wakeMinuteInput, 550, 1000, WRAP, WRAP);
+        put(pg, wakeMinuteInput, 550, 1000, 140, WRAP);
 
         Txt wakeMinuteText = txt("นาที");
         wakeMinuteText.setTextSize(18);
@@ -73,13 +77,14 @@ public class Screen_1 extends BaseClass {
 
         Txt sleepLabel = txt("เวลาเข้านอน");
         sleepLabel.setTextSize(20);
+        bold(sleepLabel);
         centerX(pg, sleepLabel, 0, 1200, WRAP, WRAP);
 
 
         // ชั่วโมงเข้านอน
         sleepHourInput = numInp();
         sleepHourInput.setInputType(android.text.InputType.TYPE_CLASS_NUMBER);
-        put(pg, sleepHourInput, 250, 1400, WRAP, WRAP);
+        put(pg, sleepHourInput, 250, 1400, 140, WRAP);
 
         Txt sleepHourText = txt("ชั่วโมง");
         sleepHourText.setTextSize(18);
@@ -91,7 +96,7 @@ public class Screen_1 extends BaseClass {
         sleepMinuteInput.setInputType(
                 android.text.InputType.TYPE_CLASS_NUMBER
         );
-        put(pg, sleepMinuteInput, 550, 1400, WRAP, WRAP);
+        put(pg, sleepMinuteInput, 550, 1400, 140, WRAP);
 
         Txt sleepMinuteText = txt("นาที");
         sleepMinuteText.setTextSize(18);
@@ -133,9 +138,7 @@ public class Screen_1 extends BaseClass {
 
         double liters = WaterCalculate.targetL(weight);
 
-        double rounded = Math.round(liters * 100.0) / 100.0;
-
-        setTxt(targetDrinkText, "ปริมาณน้ำโดยประมาณ " + rounded + " ลิตร/วัน");
+        setTxt(targetDrinkText, "ปริมาณน้ำโดยประมาณ " + WaterCalculate.L(liters) + "/วัน");
     }
 
 
@@ -256,4 +259,4 @@ public class Screen_1 extends BaseClass {
         // ไป Screen_2
         go(Screen_2.class);
     }
-}
+}

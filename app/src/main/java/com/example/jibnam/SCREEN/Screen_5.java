@@ -32,86 +32,97 @@ public class Screen_5 extends BaseClass {
 
         // ชื่อแอป
         Txt title = txt("JIBNAM");
-        title.setTextSize(40);
-        put(pg, title, 10, 10, 340, 55);
+        title.setTextSize(48);
+        bold(title);
+        centerX(pg, title, 0,0 , WRAP, WRAP);
 
         // หัวข้อ
         Txt subtitle = txt("แก้ไขประวัติ");
         subtitle.setTextSize(24);
-        put(pg, subtitle, 10, 70, 340, 40);
+        bold(subtitle);
+        centerX(pg, subtitle, 0, 180, WRAP, WRAP);
 
         // ตรวจสอบว่ามีข้อมูลแก้วหรือไม่
         if (oldDrink == null) {
             Txt errorText = txt("ไม่พบประวัติที่ต้องการแก้ไข");
-            put(pg, errorText, 10, 140, 340, 40);
+            centerX(pg, errorText, 0, 300, WRAP, WRAP);
 
             Btn backButton = btn("กลับหน้าหลัก");
-            put(pg, backButton, 110, 200, 140, 45);
-            onTap(backButton, () -> go(Screen_2.class));
+            centerX(pg, backButton, 0, 500, WRAP, WRAP);
+            onTap(backButton, () -> finish());          // ปิดหน้านี้ กลับ Screen_2 หน้าเดิม
 
             return;
         }
 
         // ข้อมูลก่อนแก้ไข
         Txt oldTitle = txt("ข้อมูลก่อนแก้ไข");
-        oldTitle.setTextSize(20);
-        put(pg, oldTitle, 20, 130, 320, 35);
+        oldTitle.setTextSize(22);
+        bold(oldTitle);
+        put(pg, oldTitle, 20, 300, WRAP, WRAP);
 
         // ปริมาณน้ำเดิม
         double oldLiter = Double.parseDouble(oldDrink[2]);
-        double oldMl = oldLiter * 1000;
-
-        Txt oldAmountText = txt("ปริมาณน้ำ: " + formatAmount(oldMl) + " ml");
-        put(pg, oldAmountText, 20, 175, 320, 35);
+        Txt oldAmountText = txt("ปริมาณน้ำ: " + WaterCalculate.ml(oldLiter));
+        oldAmountText.setTextSize(20);
+        put(pg, oldAmountText, 20, 400, WRAP, WRAP);
 
         // เวลาเดิม
         Txt oldTimeText = txt("เวลา: " + formatTime(oldDrink[3], oldDrink[4]));
-        put(pg, oldTimeText, 20, 210, 320, 35);
+        oldTimeText.setTextSize(20);
+        put(pg, oldTimeText, 20, 500, WRAP, WRAP);
 
         // ปริมาณน้ำใหม่
         Txt amountLabel = txt("ปริมาณน้ำ (ml)");
-        put(pg, amountLabel, 20, 275, 320, 30);
+        amountLabel.setTextSize(20);
+        bold(amountLabel);
+        centerX(pg, amountLabel, 0, 600, WRAP, WRAP);
 
         amountInput = numInp();
-        put(pg, amountInput, 20, 310, 320, 50);
-        setTxt(amountInput, formatAmount(oldMl));
+        amountInput.setTextSize(20);
+        centerX(pg, amountInput, 0, 700, 360, WRAP);       // กว้าง 360 เหมือนช่องกรอกใน Screen_2
+        setTxt(amountInput, "" + Math.round(oldLiter * 1000));
 
         // เวลาใหม่
         Txt timeLabel = txt("เวลา");
-        put(pg, timeLabel, 20, 390, 320, 30);
-
+        timeLabel.setTextSize(20);
+        bold(timeLabel);
+        centerX(pg, timeLabel, 0, 850, WRAP, WRAP);
         // ชั่วโมง
         hourInput = numInp();
-        hourInput.setInputType(
-                android.text.InputType.TYPE_CLASS_NUMBER
-        );
-        hourInput.setHint("ชั่วโมง");
-        put(pg, hourInput, 20, 430, 130, 50);
+        hourInput.setTextSize(20);
+        hourInput.setInputType(android.text.InputType.TYPE_CLASS_NUMBER);
+        put(pg, hourInput, 250, 1000, 140, WRAP);
 
+        Txt HourText = txt("ชั่วโมง");
+        HourText.setTextSize(20);
+        put(pg, HourText,400, 1000, WRAP, WRAP);
         // นาที
         minuteInput = numInp();
-        minuteInput.setInputType(
-                android.text.InputType.TYPE_CLASS_NUMBER
-        );
-        minuteInput.setHint("นาที");
-        put(pg, minuteInput, 190, 430, 130, 50);
+        minuteInput.setTextSize(20);
+        minuteInput.setInputType(android.text.InputType.TYPE_CLASS_NUMBER);
+        put(pg, minuteInput, 650, 1000, 140, WRAP);
+
+        Txt MinuteText = txt("นาที");
+        MinuteText.setTextSize(20);
+        put(pg, MinuteText,800, 1000, WRAP, WRAP);
 
         msgTxt = txt("");
         msgTxt.setTextSize(25);
-        put(pg, msgTxt, 20, 500, 320, 30);
+        bold(msgTxt);
+        centerX(pg, msgTxt, 0, 1400, WRAP, WRAP);
 
         setTxt(hourInput, oldDrink[3]);
         setTxt(minuteInput, oldDrink[4]);
 
         // ปุ่มลบประวัติ
         Btn deleteButton = btn("ลบประวัติ");
-        put(pg, deleteButton, 20, 530, 150, 50);
-        onTap(deleteButton, () -> deleteHistory());
+        put(pg, deleteButton, 200, 1200, WRAP, WRAP);
+        onTap(deleteButton,() ->deleteHistory());
 
         // ปุ่ม Submit
         Btn submitButton = btn("Submit");
-        put(pg, submitButton, 190, 530, 150, 50);
-        onTap(submitButton, () -> submit());
+        put(pg, submitButton, 600, 1200, WRAP, WRAP);
+        onTap(submitButton,() -> submit());
     }
 
     // บันทึกการแก้ไข
@@ -133,7 +144,7 @@ public class Screen_5 extends BaseClass {
                 showMsg("ปริมาณน้ำต้องมากกว่า 0");
                 return;
             } else if (ml > 3000) {
-                showMsg("ปริมาณน้ำต้องไม่เกิน 3000");
+                showMsg("ปริมาณน้ำต้องไม่เกิน 3000 ml");
                 return;
             }
 
@@ -163,8 +174,7 @@ public class Screen_5 extends BaseClass {
         // แก้ไขข้อมูลใน RealData.txt
         data.editDrink(serial, liters, h, m);
 
-        // กลับไปหน้า 2 เพื่ออ่านข้อมูลใหม่
-        go(Screen_2.class);
+        // ปิดหน้านี้ กลับ Screen_2 หน้าเดิม (Screen_2 ดึงข้อมูลใหม่เองตอนกลับมา onResume)
         finish();
     }
 
@@ -174,24 +184,13 @@ public class Screen_5 extends BaseClass {
         // ลบข้อมูลแก้วที่เลือกจาก RealData.txt
         data.deleteDrink(serial);
 
-        // กลับไปหน้า 2
-        go(Screen_2.class);
+        // ปิดหน้านี้ กลับ Screen_2 หน้าเดิม (Screen_2 ดึงข้อมูลใหม่เองตอนกลับมา onResume)
         finish();
     }
 
     // แสดงข้อความแจ้งเตือน
     private void showMsg(String text) {
         setTxt(msgTxt, text);
-    }
-
-    // จัดรูปแบบปริมาณน้ำ
-    private String formatAmount(double value) {
-
-        if (value == Math.floor(value)) {
-            return String.valueOf((long) value);
-        }
-
-        return String.format(Locale.US, "%.2f", value);
     }
 
     // จัดรูปแบบเวลา

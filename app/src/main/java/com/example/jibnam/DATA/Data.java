@@ -19,7 +19,6 @@ import java.util.Locale;
  *   U;sn;น้ำหนัก;ตื่นชม.;ตื่นนาที;นอนชม.;นอนนาที                 ข้อมูลผู้ใช้ (บรรทัด U ล่างสุด = ค่าปัจจุบัน)
  *   D;sn;ลิตร;ชม.;นาที;ต้องดื่ม(L);ดื่มแล้วทั้งวัน(L);แจ้งเตือน;ตื่นชม.;ตื่นนาที;นอนชม.;นอนนาที
  *                                                                 ดื่มน้ำ 1 แก้ว (ตื่น/นอน = ค่าจาก U ล่าสุดตอนที่ดื่ม)
- *   E;sn;น้ำเพิ่ม(L);ระดับ;ชม.;นาที                               ออกกำลังกาย 1 ครั้ง
  *   (บรรทัดว่าง)                                                  แก้วที่ถูกลบ
  *
  * sn (serial) = วันเวลาที่สร้าง yyyyMMddHHmmss เช่น 20261013091530 = เลขประจำแก้ว ไม่ซ้ำ ไม่เปลี่ยน
@@ -33,7 +32,7 @@ import java.util.Locale;
  *
  * เพื่อนเรียกใช้ (ต้อง import DATA.Data และ DATA.DataApi):
  *   Data data = new Data(DataApi.realDataFile(this));
- *   เพิ่ม : saveUser(...)  addDrink(ลิตร, ต้องดื่ม)  addExercise(...)
+ *   เพิ่ม : saveUser(...)  addDrink(ลิตร, ต้องดื่ม)
  *   แก้   : editDrink(sn, ลิตร, ชม., นาที)          ← Screen_5
  *   ลบ   : deleteDrink(sn)                         ← Screen_5
  *   อ่าน  : getDrinks(Data.today())  getDrink(sn)  lastUser()  sumLiters(วัน)  drankBetween(...)
@@ -67,10 +66,6 @@ public class Data {
         addLine("D;" + sn + ";" + liters + ";" + h + ";" + m + ";" + targetL + ";" + r3(total) + ";" + noti
                 + ";" + wakeSleep);                                               // ต่อท้าย: ตื่นชม.;ตื่นนาที;นอนชม.;นอนนาที
         return sn;
-    }
-
-    public void addExercise(double plusL, int level, int hour, int minute) {   // ออกกำลังกาย ← Screen_3 (เพื่อนต่อ)
-        addLine("E;" + now() + ";" + plusL + ";" + level + ";" + hour + ";" + minute);
     }
 
     // ===== แก้ / ลบ (เขียนทับทั้งไฟล์) =====
@@ -135,7 +130,7 @@ public class Data {
         return u;
     }
 
-    public List<String[]> getLines(String type, String day) {   // บรรทัดชนิด type ของวัน day (null = ทุกวัน) เช่น "E"
+    public List<String[]> getLines(String type, String day) {   // บรรทัดชนิด type ของวัน day (null = ทุกวัน) เช่น "D"
         List<String[]> out = new ArrayList<>();
         List<String[]> all = readAll();
         for (int i = 0; i < all.size(); i++) {

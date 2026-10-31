@@ -3,6 +3,7 @@ package com.example.jibnam.CODE;
 import android.content.Context;                     // ตัวแทนแอป
 import android.content.Intent;                      // เปิดหน้าอื่น
 import android.graphics.Color;                      // สี
+import android.graphics.Typeface;                   // แบบตัวหนังสือ (ตัวหนา)
 import android.graphics.drawable.GradientDrawable;  // กรอบ
 import android.os.Bundle;                           // ตอนเปิดหน้า
 import android.text.InputType;                      // ช่องกรอกตัวเลข
@@ -49,7 +50,7 @@ public abstract class BaseClass extends AppCompatActivity {
     }
 
     // สร้าง
-    protected Txt txt(String s) { Txt t = new Txt(this); t.setText(s); return t; }
+    protected Txt txt(String s) { Txt t = new Txt(this); t.setText(s); t.setTextSize(18); return t; }   // ตัวหนังสือ ขนาด 18 (อยากได้ขนาดอื่น setTextSize ทับ)
     protected Btn btn(String s) { Btn t = new Btn(this); t.setText(s); return t; }
     protected Inp numInp() { Inp t = new Inp(this); t.setInputType(InputType.TYPE_CLASS_NUMBER | InputType.TYPE_NUMBER_FLAG_DECIMAL); return t; }
     protected Img img() { return new Img(this); }
@@ -71,9 +72,10 @@ public abstract class BaseClass extends AppCompatActivity {
         v.setTranslationY(y);
     }
     protected void centerX(Box p, View v, int x, int y, int w, int h) {  // กลางแนวนอน เลื่อน x  y = ห่างบน
-        p.addView(v, new FrameLayout.LayoutParams(w, h, Gravity.CENTER_HORIZONTAL));
+        FrameLayout.LayoutParams lp = new FrameLayout.LayoutParams(w, h, Gravity.CENTER_HORIZONTAL);
+        lp.topMargin = y;                      // y เป็นระยะจริง หน้ายาวแล้วเลื่อน (scroll) ได้
+        p.addView(v, lp);
         v.setTranslationX(x);
-        v.setTranslationY(y);
     }
     protected void centerY(Box p, View v, int x, int y, int w, int h) {  // กลางแนวตั้ง เลื่อน y  x = ห่างซ้าย
         p.addView(v, new FrameLayout.LayoutParams(w, h, Gravity.CENTER_VERTICAL));
@@ -89,9 +91,10 @@ public abstract class BaseClass extends AppCompatActivity {
         p.addView(v, lp);
     }
     protected void clr(ViewGroup p) { p.removeAllViews(); }                   // ล้างกล่อง
-    protected void border(View v) {                                           // กรอบดำ พื้นขาว
+    protected void border(View v) { border(v, Color.WHITE); }                 // กรอบดำ พื้นขาว
+    protected void border(View v, int bg) {                                   // กรอบดำ พื้นสี bg เช่น Color.rgb(190, 230, 190)
         GradientDrawable g = new GradientDrawable();
-        g.setColor(Color.WHITE);
+        g.setColor(bg);
         g.setStroke(3, Color.BLACK);
         v.setBackground(g);
     }
@@ -102,6 +105,7 @@ public abstract class BaseClass extends AppCompatActivity {
 
     // ค่า (ใช้แบบนี้ หรือเรียก .setText() ตรงก็ได้)
     protected void setTxt(TextView t, String s) { t.setText(s); }                    // ตั้งข้อความ Txt Btn Inp
+    protected void bold(TextView t) { t.setTypeface(null, Typeface.BOLD); }        // ตัวหนา ใช้กับ Txt Btn Inp
     protected String getTxt(TextView t) { return t.getText().toString().trim(); }    // อ่านข้อความ (ตัดช่องว่างหัวท้าย)
     protected void setImg(Img i, int id) { i.setImageResource(id); }                 // เปลี่ยนรูป เช่น R.drawable.bottle_0
 

@@ -29,10 +29,9 @@
             android:exported="false"
             android:windowSoftInputMode="adjustResize" />
         <activity android:name=".SCREEN.Screen_1" android:exported="false" />
-        <activity android:name=".SCREEN.Screen_3" android:exported="false" />
         <activity android:name=".SCREEN.Screen_4" android:exported="false" />
         <activity android:name=".SCREEN.Screen_5" android:exported="false" />
         <activity android:name=".SCREEN.Screen_6" android:exported="false" />
     </application>
 
-</manifest>
+</manifest>

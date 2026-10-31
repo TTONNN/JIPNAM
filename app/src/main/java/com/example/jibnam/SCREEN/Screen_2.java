@@ -11,15 +11,8 @@ public class Screen_2 extends BaseClass {
     // ===== ข้อมูล (ดึงจากไฟล์ตอนเปิดหน้า) =====
     double wtKg;                         // น้ำหนักตัว (กก.) จากบรรทัด U ล่าสุด
     double tgL;                          // เป้าน้ำที่ควรดื่ม (ลิตร) = WaterCalculate.targetL(wtKg)
-    String unit = "ml";                  // หน่วยของช่องกรอก
-
-    static final String[][] CUPS = {     // ภาชนะ { ชื่อ, ปริมาณ, หน่วย }
-            {"กรวย", "50", "ml"},
-            {"แก้ว", "150", "ml"},
-            {"ขวด", "500", "ml"},
-            {"ขวดใหญ่", "1.5", "L"},
-    };
-    static final int CUP_W = 420;        // ความกว้างปุ่มภาชนะ (px) พอดีคำยาวสุด "ขวดใหญ่ 1.5 L"
+    static final String[] CUP_NAME = {"กรวย 115ml", "แก้ว 250ml", "ขวดเล็ก 600ml", "ขวดใหญ่ 1.5L"};   // ข้อความบนปุ่ม
+    static final int[] CUP_ML = {115, 250, 600, 1500};                                               // กดแล้วใส่ช่องกรอก (ml)
 
     Data data;                           // ไฟล์ RealData.txt (ข้อมูลจริงอยู่ในไฟล์ หน้าจอดึงมาโชว์อย่างเดียว)
     double drkL;                         // ดื่มแล้ววันนี้ (ลิตร) รวมจากไฟล์ทุกครั้งที่ refresh
@@ -31,16 +24,14 @@ public class Screen_2 extends BaseClass {
     };
 
     // ===== ชิ้นส่วนหน้าจอ =====
-    Txt plusTx;     // "+0.15 L" โชว์ 1 วิหลังกด submit
-    Txt drankTx;    // "ดื่มแล้ว 1.46 / 2.1 L"
+    Txt plusTx;     // "เพิ่มน้ำ : +115 ml สำเร็จ" ว่างตอนแรก กด submit แล้วค้างไว้
+    Txt drankTx;    // "ดื่มแล้ว 1.46 L / 2.10 L"
     Txt pctTx;      // % บนรูปขวด
-    Txt unitTx;     // หน่วยข้างช่องกรอก
     Img btlImg;     // รูปขวด
     Inp amtIn;      // ช่องกรอกปริมาณ
     Box hisBox;     // กล่องประวัติ (วาดใหม่ทุกครั้งที่ refresh)
     Btn notiBtn;    // ปุ่ม การแจ้งเตือน (เปิด)/(ปิด)
 
-    Runnable hidePlus = () -> show(plusTx, false);   // ซ่อน "+x L"
     int testI = 0;                                    // ปุ่มทดสอบ: กดครั้งถัดไปจะโชว์ข้อความที่เท่าไหร่
 
     @Override
@@ -52,84 +43,79 @@ public class Screen_2 extends BaseClass {
         wtKg = Double.parseDouble(data.lastUser()[2]);
         tgL = WaterCalculate.targetL(wtKg);
 
-        // ปุ่มบนสุด: แก้ไขข้อมูลส่วนตัว (หน้า 1) และหน้า 6
+        // ===== ปุ่มด้านบน 2 แถว แถวละ 2 ปุ่ม กว้างเท่ากัน =====
         Btn toS1 = btn("แก้ไขข้อมูลส่วนตัว");
         onTap(toS1, () -> go(Screen_1.class));
-        put(pg, toS1, 30, 30, 510, WRAP);
-        Btn toS6 = btn("ไป Screen_6");
+        put(pg, toS1, 30, 30, 500, WRAP);
+        Btn toS6 = btn("สรุปการดื่มน้ำ");
         onTap(toS6, () -> go(Screen_6.class));
-        put(pg, toS6, 570, 30, 480, WRAP);
+        put(pg, toS6, 550, 30, 500, WRAP);
 
-        // ปุ่มแจ้งเตือน: กดสลับ เปิด/ปิด แล้วเซฟลงไฟล์ (ตัวท้ายสุดของบรรทัด D ล่างสุด)
-        notiBtn = btn("");
+        notiBtn = btn("");                       // กดสลับ เปิด/ปิด แล้วเซฟลงไฟล์
         onTap(notiBtn, () -> {
             data.setNoti(!data.notiOn());
             showNoti();
         });
-        put(pg, notiBtn, 30, 170, 600, WRAP);
+        put(pg, notiBtn, 30, 160, 500, WRAP);
         showNoti();
-
-        // ปุ่มทดสอบแจ้งเตือน: กด 1 ครั้ง = เด้ง 1 ข้อความ ไล่ทีละแบบ ครบ 7 แบบแล้ววนกลับแบบแรก (ไว้เทส ลบได้)
-        Btn testBtn = btn("ทดสอบแจ้งเตือน");
+        Btn testBtn = btn("ทดสอบแจ้งเตือน");      // กด 1 ครั้ง = เด้ง 1 ข้อความ ไล่ครบแล้ววนใหม่
         onTap(testBtn, () -> testNoti());
-        put(pg, testBtn, 660, 170, 390, WRAP);
+        put(pg, testBtn, 550, 160, 500, WRAP);
 
-        // ข้อมูลด้านบน
-        put(pg, txt("น้ำหนักตัว " + fmt(wtKg)), 30, 320, WRAP, WRAP);
-        put(pg, txt("ปริมาณน้ำที่ควรดื่ม " + fmt(tgL) + " L"), 30, 370, WRAP, WRAP);
+        // ===== ข้อมูล + รูปขวด อยู่กลางจอ =====
+        centerX(pg, txt("น้ำหนัก " + fmt(wtKg) + " กก.    ควรดื่ม " + WaterCalculate.L(tgL)), 0, 320, WRAP, WRAP);
         drankTx = txt("");
-        put(pg, drankTx, 30, 420, WRAP, WRAP);
-        plusTx = txt("");
-        show(plusTx, false);
-        put(pg, plusTx, 30, 470, WRAP, WRAP);
+        drankTx.setTextSize(20);
+        bold(drankTx);
+        centerX(pg, drankTx, 0, 390, WRAP, WRAP);
 
-        // รูปขวด กว้าง 390 สูง 540 + % ทับกลางขวด
         btlImg = img();
-        put(pg, btlImg, 345, 520, 390, 540);
+        centerX(pg, btlImg, 0, 470, 390, 540);
         pctTx = txt("");
-        put(pg, pctTx, 465, 775, WRAP, WRAP);
+        bold(pctTx);
+        centerX(pg, pctTx, 0, 715, WRAP, WRAP);  // ทับกลางขวด
 
-        // ปุ่มภาชนะ 2 แถว แถวละ 2 ปุ่ม
-        for (int i = 0; i < CUPS.length; i++) {
-            int x = 555;                           // ขวา
-            if (i % 2 == 0) x = 105;               // ซ้าย (ปุ่มที่ 0, 2)
-            int y = 1230;                          // แถวล่าง
-            if (i < 2) y = 1090;                   // แถวบน (ปุ่มที่ 0, 1)
+        plusTx = txt("");                        // "เพิ่มน้ำ : +115 ml สำเร็จ" ว่างตอนแรก
+        bold(plusTx);
+        centerX(pg, plusTx, 0, 1030, WRAP, WRAP);
+
+        // ===== ปุ่มภาชนะ 2 แถว แถวละ 2 ปุ่ม =====
+        for (int i = 0; i < CUP_ML.length; i++) {
+            int x = 550;                           // ขวา
+            if (i % 2 == 0) x = 30;                // ซ้าย (ปุ่มที่ 0, 2)
+            int y = 1240;                          // แถวล่าง
+            if (i < 2) y = 1110;                   // แถวบน (ปุ่มที่ 0, 1)
             cupBtn(pg, i, x, y);
         }
 
-        // ช่องกรอก + หน่วย
+        // ===== ช่องกรอก ml + submit แถวเดียวกัน =====
         amtIn = numInp();
-        put(pg, amtIn, 360, 1380, 360, WRAP);
-        unitTx = txt(unit);
-        put(pg, unitTx, 735, 1425, WRAP, WRAP);
-
+        put(pg, amtIn, 180, 1390, 360, WRAP);
+        put(pg, txt("ml"), 555, 1430, WRAP, WRAP);
         Btn subBtn = btn("submit");
         onTap(subBtn, () -> submit());
-        put(pg, subBtn, 390, 1530, 300, WRAP);
+        put(pg, subBtn, 700, 1390, 300, WRAP);
 
-        // ออกกำลังกาย ฝั่งขวา
-        Btn exBtn = btn("ออกกำลังกาย");
-        onTap(exBtn, () -> go(Screen_3.class));
-        put(pg, exBtn, 630, 1680, 420, WRAP);
-
-        // หัวข้อประวัติซ้าย, Read More ขวา
-        put(pg, txt("ประวัติ (วันนี้)"), 30, 1875, WRAP, WRAP);
-        Btn moreBtn = btn("Read More");
+        // ===== ประวัติวันนี้ =====
+        Txt hisTitle = txt("ประวัติ (วันนี้)");
+        bold(hisTitle);
+        put(pg, hisTitle, 30, 1580, WRAP, WRAP);
+        Btn moreBtn = btn("Water History");
+        moreBtn.setAllCaps(false);               // ให้ขึ้นตามที่พิมพ์ ไม่เป็นตัวใหญ่หมด
         onTap(moreBtn, () -> go(Screen_4.class));
-        put(pg, moreBtn, 630, 1830, 420, WRAP);
+        put(pg, moreBtn, 630, 1545, 420, WRAP);
 
         hisBox = box();                          // กล่องประวัติ (วาดใหม่ใน refresh)
-        put(pg, hisBox, 0, 1990, WRAP, WRAP);
+        put(pg, hisBox, 0, 1690, WRAP, WRAP);
 
-        amtIn.setText(CUPS[0][1]);       // เริ่มต้นใส่ปริมาณภาชนะแรก
+        amtIn.setText("" + CUP_ML[0]);  // เริ่มต้นใส่ปริมาณภาชนะแรก
         refresh();
         Notification.start(this);        // ขอสิทธิ์แจ้งเตือน + ตั้งเตือนดื่มน้ำรอบถัดไป (CODE/Notification)
     }
 
     // ===== หน้าจอ =====
 
-    void submit() {                      // กด submit: เขียนลงไฟล์ → ดึงจากไฟล์มาโชว์ใหม่ → โชว์ +x L 1 วิ
+    void submit() {                      // กด submit: เขียนลงไฟล์ → ดึงจากไฟล์มาโชว์ใหม่ → โชว์ เพิ่มน้ำ +x ml
         double v;
         try {
             v = Double.parseDouble(amtIn.getText().toString().trim());
@@ -138,13 +124,10 @@ public class Screen_2 extends BaseClass {
         }
         if (v <= 0) return;
 
-        double l = toL(v, unit);
+        double l = v / 1000.0;           // ml → ลิตร (ในไฟล์เก็บเป็นลิตร)
         data.addDrink(l, tgL);           // เก็บลงไฟล์ (Data ใส่ serial เวลาตอนนี้ + ยอดดื่มทั้งวันให้เอง)
         refresh();
-        plusTx.setText("+" + fmt(l) + " L");
-        show(plusTx, true);
-        cancel(hidePlus);
-        later(hidePlus, 1000);
+        plusTx.setText("เพิ่มน้ำ : +" + WaterCalculate.ml(l) + " สำเร็จ");   // ค้างไว้จนกด submit ครั้งต่อไป
     }
 
     void refresh() {                     // ดึงแก้ววันนี้จากไฟล์ แล้ววาดประวัติ ยอดดื่ม รูปขวด %
@@ -156,10 +139,10 @@ public class Screen_2 extends BaseClass {
             String[] d = ds.get(k);
             double l = Double.parseDouble(d[2]);
             drkL += l;
-            hisCard(row, d[1], mlTxt(l) + "   เวลา " + hm(d[3], d[4]));
+            hisCard(row, d[1], WaterCalculate.ml(l) + "   เวลา " + hm(d[3], d[4]));
             row++;
         }
-        drankTx.setText("ดื่มแล้ว " + fmt(drkL) + " / " + fmt(tgL) + " L");
+        drankTx.setText("ดื่มแล้ว " + WaterCalculate.L(drkL) + " / " + WaterCalculate.L(tgL));
         btlImg.setImageResource(BTL[pct() / 10]);  // รูปเปลี่ยนทีละ 10%
         pctTx.setText(pctTxt());          // % ทศนิยม 2 ตำแหน่ง
     }
@@ -171,19 +154,25 @@ public class Screen_2 extends BaseClass {
         if (testI >= all.length) testI = 0;
     }
 
+    @Override
+    protected void onResume() {          // กลับมาหน้านี้ (จาก Screen_1 4 5 6) = ดึงข้อมูลจากไฟล์ใหม่ ประวัติที่แก้/ลบจะอัปเดตเอง
+        super.onResume();
+        if (data != null) {
+            refresh();
+            showNoti();
+        }
+    }
+
     void showNoti() {                    // ข้อความบนปุ่มแจ้งเตือน ดึงจากไฟล์
         if (data.notiOn()) notiBtn.setText("การแจ้งเตือน (เปิด)");
         else notiBtn.setText("การแจ้งเตือน (ปิด)");
     }
 
-    void cupBtn(Box pg, int i, int x, int y) {   // ปุ่มภาชนะที่ i ที่ (x, y): กดแล้วเติมปริมาณ + หน่วยในช่องกรอก
-        Btn b = btn(cupLbl(i));
-        put(pg, b, x, y, CUP_W, WRAP);
-        onTap(b, () -> {
-            unit = CUPS[i][2];
-            amtIn.setText(CUPS[i][1]);
-            unitTx.setText(unit);
-        });
+    void cupBtn(Box pg, int i, int x, int y) {   // ปุ่มภาชนะที่ i ที่ (x, y): กดแล้วเติมปริมาณ (ml) ในช่องกรอก
+        Btn b = btn(CUP_NAME[i]);
+        b.setAllCaps(false);                       // ml ไม่กลายเป็น ML
+        put(pg, b, x, y, 500, WRAP);
+        onTap(b, () -> amtIn.setText("" + CUP_ML[i]));
     }
 
     /*
@@ -199,7 +188,7 @@ public class Screen_2 extends BaseClass {
     void hisCard(int row, String sn, String s) {   // ประวัติแถวที่ row: กรอบสูง 150 ห่างกันแถวละ 168 (sn = serial ของแก้ว)
         Box c = box();
         border(c);
-        put(c, txt(s), 30, 45, WRAP, WRAP);                     // ข้อความซ้าย
+        put(c, txt(s), 30, 42, WRAP, WRAP);                     // ข้อความซ้าย
         Btn edBtn = btn("แก้ไข");
         onTap(edBtn, () -> goWith(Screen_5.class, "serial", sn));   // ส่ง serial ไปหน้า 5
         put(c, edBtn, 750, 3, 240, WRAP);                        // ปุ่มแก้ไขขวา
@@ -220,10 +209,6 @@ public class Screen_2 extends BaseClass {
         return String.format(Locale.US, "%.2f%%", p);
     }
 
-    static double toL(double v, String u) {   // แปลงเป็นลิตร (ml ÷ 1000, L ใช้ตรงๆ)
-        if ("L".equals(u)) return v;
-        return v / 1000.0;
-    }
 
     // ===== จัดข้อความ =====
 
@@ -234,15 +219,8 @@ public class Screen_2 extends BaseClass {
         return String.format(Locale.US, "%.2f", r / 100.0);
     }
 
-    static String mlTxt(double l) {      // 0.64 → "640 ml"
-        return Math.round(l * 1000) + " ml";
-    }
-
     static String hm(String h, String m) {   // "9","5" → "09:05"
         return String.format(Locale.US, "%02d:%02d", Integer.parseInt(h), Integer.parseInt(m));
     }
 
-    static String cupLbl(int i) {        // ชื่อบนปุ่มภาชนะ เช่น "กรวย 50 ml"
-        return CUPS[i][0] + " " + CUPS[i][1] + " " + CUPS[i][2];
-    }
 }
