@@ -1,13 +1,9 @@
 package com.example.jibnam.SCREEN;
 
-import com.example.jibnam.CODE.BaseClass;
-import com.example.jibnam.R;
-import com.example.jibnam.CODE.WaterCalculate;
-import com.example.jibnam.DATA.Data;
-import com.example.jibnam.DATA.DataApi;
-
-import java.util.List;
-import java.util.Locale;
+import com.example.jibnam.R;            // รูปใน res/drawable เช่น R.drawable.bottle_0
+import com.example.jibnam.CODE.*;       // BaseClass, WaterCalculate
+import com.example.jibnam.DATA.*;       // Data, DataApi
+import java.util.*;                     // List, Locale
 
 /** Screen_2 : หน้าหลัก บันทึกดื่มน้ำ — หน้าจอ + ข้อมูล + คำนวณ อยู่ในไฟล์นี้ */
 public class Screen_2 extends BaseClass {
@@ -23,7 +19,7 @@ public class Screen_2 extends BaseClass {
             {"ขวด", "500", "ml"},
             {"ขวดใหญ่", "1.5", "L"},
     };
-    static final int CUP_W = 140;        // ความกว้างปุ่มภาชนะ (dp) พอดีคำยาวสุด "ขวดใหญ่ 1.5 L"
+    static final int CUP_W = 420;        // ความกว้างปุ่มภาชนะ (px) พอดีคำยาวสุด "ขวดใหญ่ 1.5 L"
 
     Data data;                           // ไฟล์ RealData.txt (ข้อมูลจริงอยู่ในไฟล์ หน้าจอดึงมาโชว์อย่างเดียว)
     double drkL;                         // ดื่มแล้ววันนี้ (ลิตร) รวมจากไฟล์ทุกครั้งที่ refresh
@@ -47,7 +43,7 @@ public class Screen_2 extends BaseClass {
     Runnable hidePlus = () -> show(plusTx, false);   // ซ่อน "+x L"
 
     @Override
-    protected void build(Box pg) {          // วางของแบบนับพิกัด put(pg, ของ, x, y, กว้าง, สูง) หน่วย dp
+    protected void build(Box pg) {          // วางของแบบนับพิกัด put(pg, ของ, x, y, กว้าง, สูง) หน่วย px
         // ดึงข้อมูลผู้ใช้จากไฟล์ RealData.txt
         data = new Data(DataApi.realDataFile(this));
         if (data.lastUser() == null)                                   // ชั่วคราว: ยังไม่มีข้อมูลผู้ใช้ ใส่ค่าตัวอย่างไว้ก่อน
@@ -56,13 +52,13 @@ public class Screen_2 extends BaseClass {
         tgL = WaterCalculate.targetL(wtKg);
 
         // ปุ่มทดสอบ ไปหน้า 1 และหน้า 6
-        put(pg, txt("Screen_2"), 10, 10, WRAP, WRAP);
+        put(pg, txt("Screen_2"), 30, 30, WRAP, WRAP);
         Btn toS1 = btn("ไป Screen_1");
         onTap(toS1, () -> go(Screen_1.class));
-        put(pg, toS1, 10, 30, 150, WRAP);
+        put(pg, toS1, 30, 90, 450, WRAP);
         Btn toS6 = btn("ไป Screen_6");
         onTap(toS6, () -> go(Screen_6.class));
-        put(pg, toS6, 170, 30, 150, WRAP);
+        put(pg, toS6, 510, 90, 450, WRAP);
 
         // ปุ่มแจ้งเตือน: กดสลับ เปิด/ปิด แล้วเซฟลงไฟล์ (ตัวท้ายสุดของบรรทัด D ล่างสุด)
         notiBtn = btn("");
@@ -70,56 +66,56 @@ public class Screen_2 extends BaseClass {
             data.setNoti(!data.notiOn());
             showNoti();
         });
-        put(pg, notiBtn, 10, 85, 200, WRAP);
+        put(pg, notiBtn, 30, 255, 600, WRAP);
         showNoti();
 
         // ข้อมูลด้านบน
-        put(pg, txt("น้ำหนักตัว " + fmt(wtKg)), 10, 140, WRAP, WRAP);
-        put(pg, txt("ปริมาณน้ำที่ควรดื่ม " + fmt(tgL) + " L"), 10, 160, WRAP, WRAP);
+        put(pg, txt("น้ำหนักตัว " + fmt(wtKg)), 30, 420, WRAP, WRAP);
+        put(pg, txt("ปริมาณน้ำที่ควรดื่ม " + fmt(tgL) + " L"), 30, 480, WRAP, WRAP);
         drankTx = txt("");
-        put(pg, drankTx, 10, 180, WRAP, WRAP);
+        put(pg, drankTx, 30, 540, WRAP, WRAP);
         plusTx = txt("");
         show(plusTx, false);
-        put(pg, plusTx, 10, 200, WRAP, WRAP);
+        put(pg, plusTx, 30, 600, WRAP, WRAP);
 
-        // รูปขวด กว้าง 130 สูง 180 + % ทับกลางขวด
+        // รูปขวด กว้าง 390 สูง 540 + % ทับกลางขวด
         btlImg = img();
-        put(pg, btlImg, 115, 225, 130, 180);
+        put(pg, btlImg, 345, 675, 390, 540);
         pctTx = txt("");
-        put(pg, pctTx, 155, 310, WRAP, WRAP);
+        put(pg, pctTx, 465, 930, WRAP, WRAP);
 
         // ปุ่มภาชนะ 2 แถว แถวละ 2 ปุ่ม
         for (int i = 0; i < CUPS.length; i++) {
-            int x = (i % 2 == 0) ? 35 : 185;      // ซ้าย / ขวา
-            int y = (i < 2) ? 415 : 465;          // แถวบน / แถวล่าง
+            int x = (i % 2 == 0) ? 105 : 555;      // ซ้าย / ขวา
+            int y = (i < 2) ? 1245 : 1395;          // แถวบน / แถวล่าง
             cupBtn(pg, i, x, y);
         }
 
         // ช่องกรอก + หน่วย
         amtIn = numInp();
-        put(pg, amtIn, 120, 520, 120, WRAP);
+        put(pg, amtIn, 360, 1560, 360, WRAP);
         unitTx = txt(unit);
-        put(pg, unitTx, 245, 535, WRAP, WRAP);
+        put(pg, unitTx, 735, 1605, WRAP, WRAP);
 
         Btn subBtn = btn("submit");
         onTap(subBtn, this::submit);
-        put(pg, subBtn, 130, 575, 100, WRAP);
+        put(pg, subBtn, 390, 1725, 300, WRAP);
 
         // ออกกำลังกาย ฝั่งขวา
         Btn exBtn = btn("ออกกำลังกาย");
         onTap(exBtn, () -> go(Screen_3.class));
-        put(pg, exBtn, 210, 630, 140, WRAP);
+        put(pg, exBtn, 630, 1890, 420, WRAP);
 
         // หัวข้อประวัติซ้าย, Read More ขวา
-        put(pg, txt("ประวัติ (วันนี้)"), 10, 700, WRAP, WRAP);
+        put(pg, txt("ประวัติ (วันนี้)"), 30, 2100, WRAP, WRAP);
         Btn moreBtn = btn("Read More");
         onTap(moreBtn, () -> go(Screen_4.class));
-        put(pg, moreBtn, 210, 685, 140, WRAP);
+        put(pg, moreBtn, 630, 2055, 420, WRAP);
 
         hisBox = box();                          // กล่องประวัติ (วาดใหม่ใน refresh)
-        put(pg, hisBox, 0, 740, WRAP, WRAP);
+        put(pg, hisBox, 0, 2220, WRAP, WRAP);
 
-        setTxt(amtIn, CUPS[0][1]);       // เริ่มต้นใส่ปริมาณภาชนะแรก
+        amtIn.setText(CUPS[0][1]);       // เริ่มต้นใส่ปริมาณภาชนะแรก
         refresh();
     }
 
@@ -128,7 +124,7 @@ public class Screen_2 extends BaseClass {
     void submit() {                      // กด submit: เขียนลงไฟล์ → ดึงจากไฟล์มาโชว์ใหม่ → โชว์ +x L 1 วิ
         double v;
         try {
-            v = Double.parseDouble(getTxt(amtIn));
+            v = Double.parseDouble(amtIn.getText().toString().trim());
         } catch (NumberFormatException e) {
             return;                      // ว่าง / ไม่ใช่ตัวเลข → ไม่ทำอะไร
         }
@@ -137,7 +133,7 @@ public class Screen_2 extends BaseClass {
         double l = toL(v, unit);
         data.addDrink(l, tgL);           // เก็บลงไฟล์ (Data ใส่ serial เวลาตอนนี้ + ยอดดื่มทั้งวันให้เอง)
         refresh();
-        setTxt(plusTx, "+" + fmt(l) + " L");
+        plusTx.setText("+" + fmt(l) + " L");
         show(plusTx, true);
         cancel(hidePlus);
         later(hidePlus, 1000);
@@ -155,13 +151,13 @@ public class Screen_2 extends BaseClass {
             hisCard(row, d[1], mlTxt(l) + "   เวลา " + hm(d[3], d[4]));
             row++;
         }
-        setTxt(drankTx, "ดื่มแล้ว " + fmt(drkL) + " / " + fmt(tgL) + " L");
-        setImg(btlImg, BTL[pct() / 10]);  // รูปเปลี่ยนทีละ 10%
-        setTxt(pctTx, pctTxt());          // % ทศนิยม 2 ตำแหน่ง
+        drankTx.setText("ดื่มแล้ว " + fmt(drkL) + " / " + fmt(tgL) + " L");
+        btlImg.setImageResource(BTL[pct() / 10]);  // รูปเปลี่ยนทีละ 10%
+        pctTx.setText(pctTxt());          // % ทศนิยม 2 ตำแหน่ง
     }
 
     void showNoti() {                    // ข้อความบนปุ่มแจ้งเตือน ดึงจากไฟล์
-        setTxt(notiBtn, "การแจ้งเตือน (" + (data.notiOn() ? "เปิด" : "ปิด") + ")");
+        notiBtn.setText("การแจ้งเตือน (" + (data.notiOn() ? "เปิด" : "ปิด") + ")");
     }
 
     void cupBtn(Box pg, int i, int x, int y) {   // ปุ่มภาชนะที่ i ที่ (x, y): กดแล้วเติมปริมาณ + หน่วยในช่องกรอก
@@ -169,8 +165,8 @@ public class Screen_2 extends BaseClass {
         put(pg, b, x, y, CUP_W, WRAP);
         onTap(b, () -> {
             unit = CUPS[i][2];
-            setTxt(amtIn, CUPS[i][1]);
-            setTxt(unitTx, unit);
+            amtIn.setText(CUPS[i][1]);
+            unitTx.setText(unit);
         });
     }
 
@@ -184,14 +180,14 @@ public class Screen_2 extends BaseClass {
      *   data.deleteDrink(sn);                          // ลบ = เขียนทับบรรทัดนั้นด้วยบรรทัดว่าง
      *   go(Screen_2.class);                            // กลับมา Screen_2 จะดึงจากไฟล์ใหม่เอง
      */
-    void hisCard(int row, String sn, String s) {   // ประวัติแถวที่ row: กรอบสูง 50 ห่างกันแถวละ 56 (sn = serial ของแก้ว)
+    void hisCard(int row, String sn, String s) {   // ประวัติแถวที่ row: กรอบสูง 150 ห่างกันแถวละ 168 (sn = serial ของแก้ว)
         Box c = box();
         border(c);
-        put(c, txt(s), 10, 15, WRAP, WRAP);                     // ข้อความซ้าย
+        put(c, txt(s), 30, 45, WRAP, WRAP);                     // ข้อความซ้าย
         Btn edBtn = btn("แก้ไข");
         onTap(edBtn, () -> goWith(Screen_5.class, "serial", sn));   // ส่ง serial ไปหน้า 5
-        put(c, edBtn, 250, 1, 80, WRAP);                        // ปุ่มแก้ไขขวา
-        put(hisBox, c, 10, row * 56, 340, 50);
+        put(c, edBtn, 750, 3, 240, WRAP);                        // ปุ่มแก้ไขขวา
+        put(hisBox, c, 30, row * 168, 1020, 150);
     }
 
     // ===== คำนวณ =====

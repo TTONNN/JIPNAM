@@ -17,7 +17,8 @@ import java.util.Locale;
  *
  * 1 บรรทัด = 1 ข้อมูล คั่นด้วย ;  ตัวแรกบอกชนิด
  *   U;sn;น้ำหนัก;ตื่นชม.;ตื่นนาที;นอนชม.;นอนนาที                 ข้อมูลผู้ใช้ (บรรทัด U ล่างสุด = ค่าปัจจุบัน)
- *   D;sn;ลิตร;ชม.;นาที;ต้องดื่ม(L);ดื่มแล้วทั้งวัน(L);แจ้งเตือน     ดื่มน้ำ 1 แก้ว
+ *   D;sn;ลิตร;ชม.;นาที;ต้องดื่ม(L);ดื่มแล้วทั้งวัน(L);แจ้งเตือน;ตื่นชม.;ตื่นนาที;นอนชม.;นอนนาที
+ *                                                                 ดื่มน้ำ 1 แก้ว (ตื่น/นอน = ค่าจาก U ล่าสุดตอนที่ดื่ม)
  *   E;sn;น้ำเพิ่ม(L);ระดับ;ชม.;นาที                               ออกกำลังกาย 1 ครั้ง
  *   (บรรทัดว่าง)                                                  แก้วที่ถูกลบ
  *
@@ -58,7 +59,10 @@ public class Data {
         int h = Integer.parseInt(sn.substring(8, 10));
         int m = Integer.parseInt(sn.substring(10, 12));
         double total = sumLiters(sn.substring(0, 8)) + liters;                    // ดื่มแล้วทั้งวัน รวมแก้วนี้
-        addLine("D;" + sn + ";" + liters + ";" + h + ";" + m + ";" + targetL + ";" + r3(total) + ";" + (notiOn() ? "on" : "off"));
+        String[] u = lastUser();                                                   // เวลาตื่น/นอน จาก Screen_1 (บรรทัด U ล่าสุด)
+        String wakeSleep = u == null ? "0;0;0;0" : u[3] + ";" + u[4] + ";" + u[5] + ";" + u[6];   // ยังไม่มี U = 0
+        addLine("D;" + sn + ";" + liters + ";" + h + ";" + m + ";" + targetL + ";" + r3(total) + ";" + (notiOn() ? "on" : "off")
+                + ";" + wakeSleep);                                               // ต่อท้าย: ตื่นชม.;ตื่นนาที;นอนชม.;นอนนาที
         return sn;
     }
 
@@ -110,7 +114,7 @@ public class Data {
         return out;
     }
 
-    public String[] getDrink(String sn) {   // แก้ว sn = { "D", sn, ลิตร, ชม., นาที, ต้องดื่ม, ดื่มแล้วทั้งวัน, แจ้งเตือน } ไม่มี = null
+    public String[] getDrink(String sn) {   // แก้ว sn = { "D", sn, ลิตร, ชม., นาที, ต้องดื่ม, ดื่มแล้วทั้งวัน, แจ้งเตือน, ตื่นชม., ตื่นนาที, นอนชม., นอนนาที } ไม่มี = null
         List<String[]> all = readAll();
         int i = find(all, sn);
         return i < 0 ? null : all.get(i);
