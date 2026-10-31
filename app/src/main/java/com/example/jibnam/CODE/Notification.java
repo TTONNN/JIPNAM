@@ -1,26 +1,19 @@
 package com.example.jibnam.CODE;
 
-import android.app.Activity;                               // หน้าจอ (ใช้ขอสิทธิ์แจ้งเตือน)
-import android.app.AlarmManager;                           // ตั้งปลุกให้ระบบเรียกเรากลับมา
+import android.app.AlarmManager;                           // ตั้งปลุก
 import android.app.PendingIntent;                          // งานที่ฝากระบบไว้ทำตอนถึงเวลา
 import android.content.BroadcastReceiver;                  // ตัวรับ ตอนถึงเวลาปลุก
 import android.content.Context;                            // ตัวแทนแอป
 import android.content.Intent;                             // ใบสั่ง (ปลุกตัวนี้ / เปิดแอป)
-import android.content.pm.PackageManager;                  // เช็กว่าได้สิทธิ์ไหม
-import android.os.Build;                                   // เวอร์ชัน Android ของเครื่อง
-import androidx.core.app.ActivityCompat;                   // ขอสิทธิ์
-import androidx.core.app.NotificationChannelCompat;        // ช่องแจ้งเตือน (Android 8+ ต้องมี)
+import androidx.core.app.NotificationChannelCompat;        // ช่องแจ้งเตือน
 import androidx.core.app.NotificationCompat;               // สร้างแจ้งเตือน
 import androidx.core.app.NotificationManagerCompat;        // ส่งแจ้งเตือน
-import androidx.core.content.ContextCompat;                // เช็กสิทธิ์
 
 import com.example.jibnam.DATA.Data;
 import com.example.jibnam.DATA.DataApi;
 
-import java.text.SimpleDateFormat;
 import java.util.Calendar;
 import java.util.List;
-import java.util.Locale;
 
 /*
  * Notification : เตือนดื่มน้ำ
@@ -64,8 +57,8 @@ public class Notification extends BroadcastReceiver {
     }
 
     // ===== เรียกจากหน้าจอ =====
-    public static void start(Activity a) {          // ขอสิทธิ์แจ้งเตือน (Android 13+) แล้วตั้งปลุกรอบถัดไป
-        if (!allowed(a)) ActivityCompat.requestPermissions(a, new String[]{"android.permission.POST_NOTIFICATIONS"}, 1);
+    public static void start(BaseClass a) {         // ขอสิทธิ์แจ้งเตือน แล้วตั้งปลุกรอบถัดไป
+        if (!allowed(a)) a.requestPermissions(new String[]{"android.permission.POST_NOTIFICATIONS"}, 1);
         next(a);
     }
 
@@ -115,17 +108,19 @@ public class Notification extends BroadcastReceiver {
     static int awayDays(Data data, String today) {  // หายไปกี่วันเต็ม (0 = เมื่อวาน/วันนี้ยังบันทึกอยู่)
         String last = data.lastUser()[1].substring(0, 8);            // วันล่าสุดที่ทำอะไรในแอป (U หรือ D)
         List<String[]> ds = data.getDrinks(null);
-        if (!ds.isEmpty()) {
+        if (ds.size() > 0) {
             String d = ds.get(ds.size() - 1)[1].substring(0, 8);
             if (d.compareTo(last) > 0) last = d;
         }
-        try {
-            SimpleDateFormat f = new SimpleDateFormat("yyyyMMdd", Locale.US);
-            long diff = f.parse(today).getTime() - f.parse(last).getTime();
-            return (int) Math.round(diff / 86400000.0) - 1;
-        } catch (Exception e) {
-            return 0;
-        }
+        long diff = dayMs(today) - dayMs(last);
+        return (int) Math.round(diff / 86400000.0) - 1;              // 86400000 ms = 1 วัน
+    }
+
+    static long dayMs(String day) {                 // "20261031" → เวลาเที่ยงคืนของวันนั้น (ms)
+        Calendar cal = Calendar.getInstance();
+        cal.clear();
+        cal.set(Integer.parseInt(day.substring(0, 4)), Integer.parseInt(day.substring(4, 6)) - 1, Integer.parseInt(day.substring(6, 8)));
+        return cal.getTimeInMillis();
     }
 
     // ===== ตั้งปลุก / เด้งแจ้งเตือน =====
@@ -168,9 +163,8 @@ public class Notification extends BroadcastReceiver {
                 .build());
     }
 
-    static boolean allowed(Context c) {             // ได้สิทธิ์แจ้งเตือนไหม (ต่ำกว่า Android 13 ได้เลย)
-        return Build.VERSION.SDK_INT < 33
-                || ContextCompat.checkSelfPermission(c, "android.permission.POST_NOTIFICATIONS") == PackageManager.PERMISSION_GRANTED;
+    static boolean allowed(Context c) {             // ได้สิทธิ์แจ้งเตือนไหม
+        return NotificationManagerCompat.from(c).areNotificationsEnabled();
     }
 
     public static int nowMin() {                           // ตอนนี้กี่นาทีของวัน
