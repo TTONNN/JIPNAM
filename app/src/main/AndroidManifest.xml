@@ -13,16 +13,16 @@
         android:theme="@style/Theme.JIBNAM" >
 
         <activity
-            android:name=".MainActivity"
+            android:name=".CODE.MainActivity"
             android:exported="false"
             android:windowSoftInputMode="adjustResize" />
         <activity
-            android:name=".Screen_2"
+            android:name=".SCREEN.Screen_2"
             android:exported="false"
             android:windowSoftInputMode="adjustResize" />
         <!-- เปิดแอปแล้วเข้า Screen_1 ก่อน -->
         <activity
-            android:name=".Screen_1"
+            android:name=".SCREEN.Screen_1"
             android:exported="true">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
@@ -30,10 +30,10 @@
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
-        <activity android:name=".Screen_3" android:exported="false" />
-        <activity android:name=".Screen_4" android:exported="false" />
-        <activity android:name=".Screen_5" android:exported="false" />
-        <activity android:name=".Screen_6" android:exported="false" />
+        <activity android:name=".SCREEN.Screen_3" android:exported="false" />
+        <activity android:name=".SCREEN.Screen_4" android:exported="false" />
+        <activity android:name=".SCREEN.Screen_5" android:exported="false" />
+        <activity android:name=".SCREEN.Screen_6" android:exported="false" />
     </application>
 
 </manifest>

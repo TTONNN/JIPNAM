@@ -1,4 +1,4 @@
-package com.example.jibnam;
+package com.example.jibnam.CODE;
 
 /** CalendarMonth : คำนวณข้อมูลเดือนสำหรับปฏิทิน — จำนวนวัน, วันที่ 1 ตรงกับวันอะไร (ยังไม่ได้เขียน) */
 public class CalendarMonth {

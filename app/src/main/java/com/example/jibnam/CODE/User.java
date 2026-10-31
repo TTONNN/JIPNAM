@@ -1,4 +1,4 @@
-package com.example.jibnam;
+package com.example.jibnam.CODE;
 
 public class User {
         private double weight ;
