@@ -13,7 +13,7 @@
         android:theme="@style/Theme.JIBNAM" >
 
         <activity
-            android:name=".MainActivity"
+            android:name=".CODE.MainActivity"
             android:exported="false"
             android:windowSoftInputMode="adjustResize" />
         <activity

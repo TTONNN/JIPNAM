@@ -1,4 +1,4 @@
-package com.example.jibnam;
+package com.example.jibnam.CODE;
 
 /** WaterCalculate : คำนวณน้ำ — เป้าที่ควรดื่ม, ดื่มแล้ว/ยังขาด, ระดับการดื่ม, ผลจากออกกำลังกาย, สรุปผล */
 public class WaterCalculate {
