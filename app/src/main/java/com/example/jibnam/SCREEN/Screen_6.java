@@ -77,9 +77,9 @@ public class Screen_6 extends BaseClass {
                 16, 10, 65, 340, 30);
 
         showTxt(pg, "รายละเอียดการดื่มแต่ละช่วง",
-                16, 10, 110, 340, 30);
+                16, 10, 100, 340, 30);
 
-        // แสดง 5 ช่วงเวลา
+        // แสดง 5 ช่วงเวลา แยกเป็น 5 กล่อง
         int nowOffset = getCurrentOffset();
 
         for (int i = 0; i < 5; i++) {
@@ -98,19 +98,26 @@ public class Screen_6 extends BaseClass {
                     + " ml ดื่มไป " + ml(drank[i])
                     + " ml" + marker;
 
+            // สร้างกล่องของแต่ละช่วง
+            Col itemBox = col();
+            border(itemBox);
+
             Txt item = txt(text);
             item.setTextSize(12);
             item.setSingleLine(true);
             item.setGravity(17);
-            item.setPadding(3, 5, 3, 5);
+            item.setPadding(5, 0, 5, 0);
+            item.setIncludeFontPadding(false);
 
-            placeTxt(pg, item, 10, 150 + i * 48, 340, 40);
+            add(itemBox, item, u(330), u(40));
+
+            // วางกล่องแต่ละช่วง
+            put(pg, itemBox,
+                    u(10), u(130 + i * 48),
+                    u(340), u(40));
         }
 
-        // =================================
         // คำนวณย้อนหลัง 7 รอบ
-        // =================================
-
         double[] weeklyVolume = new double[5];
         int[] drankDays = new int[5];
 
@@ -142,30 +149,48 @@ public class Screen_6 extends BaseClass {
         // กลับมาคำนวณรอบปัจจุบัน
         calculateDrinks(cycleStart);
 
+        // วิเคราะห์ 7 วัน
         showTxt(pg, "วิเคราะห์การดื่มย้อนหลัง 7 วัน",
-                16, 10, 400, 340, 30);
+                16, 10, 380, 340, 30);
 
         if (!complete7Days) {
 
             showTxt(pg, "กรุณาใช้แอปนี้ถึง 7 วันก่อน",
-                    14, 10, 435, 340, 45);
+                    14, 10, 415, 340, 35);
 
         } else {
 
             showWeekly(pg, weeklyVolume, drankDays);
         }
 
+        // คำเตือนเรื่องการดื่มน้ำ
+        showTxt(pg, "⚠️ คำเตือนเรื่องการดื่มน้ำ",
+                14, 10, 525, 340, 30);
+
+        showTxt(pg,
+                "ดื่มน้ำมากเกินไป วันละ 6-7 ลิตร",
+                11, 10, 555, 340, 25);
+
+        showTxt(pg,
+                "อาจเป็นอันตรายถึงขั้นเสียชีวิตได้",
+                11, 10, 580, 340, 25);
+
+        showTxt(pg,
+                "ดื่มน้ำน้อยเกินไป เสี่ยงเกิดโรคต่าง ๆ",
+                11, 10, 605, 340, 25);
+
+        showTxt(pg,
+                "เช่น โรคนิ่ว และทางเดินปัสสาวะอักเสบ",
+                11, 10, 630, 340, 25);
+
         // ปุ่มกลับ
         Btn back = btn("กลับ");
-        placeBtn(pg, back, 80, 590, 200, 45);
+        placeBtn(pg, back, 80, 675, 200, 45);
 
         onTap(back, () -> go(Screen_2.class));
     }
 
-    // =============================================
     // แสดงข้อความ
-    // =============================================
-
     void showTxt(Box pg, String text, int size,
                  int x, int y, int w, int h) {
 
@@ -176,33 +201,29 @@ public class Screen_6 extends BaseClass {
         placeTxt(pg, v, x, y, w, h);
     }
 
-    // =============================================
     // เลือก Emoji
-    // =============================================
-
     String getEmoji(int i, int now) {
 
         boolean current = now >= start[i] && now < end[i];
 
         if (current) {
             return "👉";
+        } else if (drank[i] >= goal[i] * 1.2) {
+            return "🟦";
         } else if (now < start[i]) {
             return "⬜";
         } else if (drank[i] >= goal[i]) {
-            return "🟢";
+            return "🟩";
         } else if (drank[i] > 0) {
-            return "🟡";
+            return "🟨";
         } else if (now >= end[i]) {
-            return "🔴";
+            return "🟥";
         }
 
         return "⬜";
     }
 
-    // =============================================
     // แสดงผลวิเคราะห์ 7 วัน
-    // =============================================
-
     void showWeekly(Box pg, double[] volume, int[] days) {
 
         double max = volume[0];
@@ -229,7 +250,7 @@ public class Screen_6 extends BaseClass {
 
         String most = "💧 ดื่มน้ำมากที่สุด: ";
         String least = "💧 ดื่มน้ำน้อยที่สุด: ";
-        String missedText = "⚠️ ขาดการดื่มบ่อยที่สุด: ";
+        String missedText = " ขาดการดื่มบ่อยที่สุด: ";
 
         for (int i = 0; i < 5; i++) {
 
@@ -248,20 +269,16 @@ public class Screen_6 extends BaseClass {
             int missed = 7 - days[i];
 
             if (missed == maxMissed) {
-                missedText += periodName[i]
-                        + " (" + missed + " วัน) ";
+                missedText += periodName[i] + " (" + missed + " วัน) ";
             }
         }
 
-        showTxt(pg, most, 12, 10, 435, 340, 45);
-        showTxt(pg, least, 12, 10, 480, 340, 45);
-        showTxt(pg, missedText, 12, 10, 525, 340, 45);
+        showTxt(pg, most, 11, 10, 415, 340, 35);
+        showTxt(pg, least, 11, 10, 450, 340, 35);
+        showTxt(pg, missedText, 11, 10, 485, 340, 35);
     }
 
-    // =============================================
     // แปลงหน่วยและวางตำแหน่ง
-    // =============================================
-
     int u(int value) {
 
         return value * getResources()
@@ -286,10 +303,7 @@ public class Screen_6 extends BaseClass {
         centerX(p, v, u(x), u(y), u(w), u(h));
     }
 
-    // =============================================
     // คำนวณเวลา 5 ช่วง
-    // =============================================
-
     void calculatePeriods() {
 
         int total = sleepMin - wakeMin;
@@ -309,19 +323,14 @@ public class Screen_6 extends BaseClass {
             if (i == 4) {
                 end[i] = wakeMin + total;
             } else {
-                end[i] = wakeMin
-                        + (int) Math.round(total * accumulated);
+                end[i] = wakeMin + (int) Math.round(total * accumulated);
             }
-
             current = end[i];
             goal[i] = targetL * ratio[i];
         }
     }
 
-    // =============================================
     // หารอบการตื่นปัจจุบัน
-    // =============================================
-
     Calendar getCycleStart() {
 
         Calendar c = Calendar.getInstance();
@@ -341,10 +350,7 @@ public class Screen_6 extends BaseClass {
         return c;
     }
 
-    // =============================================
     // ตรวจว่ารอบนั้นมีรายการดื่มน้ำหรือไม่
-    // =============================================
-
     boolean hasDrinkInCycle(Calendar day) {
 
         Calendar begin = (Calendar) day.clone();
@@ -383,10 +389,7 @@ public class Screen_6 extends BaseClass {
         return false;
     }
 
-    // =============================================
     // คำนวณน้ำที่ดื่มในแต่ละช่วง
-    // =============================================
-
     void calculateDrinks(Calendar day) {
 
         for (int i = 0; i < 5; i++) {
@@ -440,10 +443,7 @@ public class Screen_6 extends BaseClass {
         }
     }
 
-    // =============================================
     // เวลาปัจจุบันนับจากเวลาตื่น
-    // =============================================
-
     int getCurrentOffset() {
 
         Calendar begin = (Calendar) cycleStart.clone();
@@ -471,28 +471,15 @@ public class Screen_6 extends BaseClass {
         return wakeMin + elapsed;
     }
 
-    // =============================================
     // แปลงเวลาและปริมาณน้ำ
-    // =============================================
-
     String timeText(int minute) {
 
         int m = minute % 1440;
 
-        return String.format(
-                Locale.getDefault(),
-                "%02d:%02d",
-                m / 60,
-                m % 60
-        );
+        return String.format(Locale.getDefault(), "%02d:%02d", m / 60,m % 60);
     }
 
     String ml(double liters) {
-
-        return String.format(
-                Locale.getDefault(),
-                "%.0f",
-                liters * 1000
-        );
+        return String.format(Locale.getDefault(), "%.0f", liters * 1000);
     }
 }
