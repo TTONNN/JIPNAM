@@ -33,13 +33,11 @@ public class Screen_5 extends BaseClass {
         // ชื่อแอป
         Txt title = txt("JIBNAM");
         title.setTextSize(40);
-        title.setGravity(android.view.Gravity.CENTER);
         put(pg, title, 10, 10, 340, 55);
 
         // หัวข้อ
         Txt subtitle = txt("แก้ไขประวัติ");
         subtitle.setTextSize(24);
-        subtitle.setGravity(android.view.Gravity.CENTER);
         put(pg, subtitle, 10, 70, 340, 40);
 
         // ตรวจสอบว่ามีข้อมูลแก้วหรือไม่

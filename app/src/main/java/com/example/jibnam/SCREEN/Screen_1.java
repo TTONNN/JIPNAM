@@ -22,20 +22,19 @@ public class Screen_1 extends BaseClass {
         // ชื่อแอป
         Txt title = txt("JIBNAM");
         title.setTextSize(48);
-        put(pg, title, 100, 10, WRAP, WRAP);
+        centerX(pg, title, 0, 0, WRAP, WRAP);
 
         // น้ำหนักตัว
         Txt weightLabel = txt("น้ำหนักตัว (กิโลกรัม)");
         weightLabel.setTextSize(20);
-        put(pg, weightLabel, 100, 70, WRAP, WRAP);
+        centerX(pg, weightLabel, 0, 220, WRAP, WRAP);
 
         weightInput = numInp();
-        weightInput.setHint("กรุณาใส่น้ำหนักตัวของคุณ");
-        put(pg, weightInput, 10, 105, WRAP, WRAP);
+        centerX(pg, weightInput, 0, 300, WRAP, WRAP);
 
         // ปุ่มคำนวณ
         Btn calculateButton = btn("คำนวณ");
-        put(pg, calculateButton, 10, 155, WRAP, WRAP);
+        centerX(pg, calculateButton, 0, 450, WRAP, WRAP);
 
         onTap(calculateButton, this::calculateTarget);
 
@@ -43,48 +42,48 @@ public class Screen_1 extends BaseClass {
         // แสดงปริมาณน้ำที่แนะนำ
         targetDrinkText = txt("ปริมาณน้ำที่แนะนำจะแสดงที่นี่");
         targetDrinkText.setTextSize(20);
-        put(pg, targetDrinkText, 10, 210, WRAP, WRAP);
+        centerX(pg, targetDrinkText, 0, 650, WRAP, WRAP);
         // เวลาตื่นนอน
 
         Txt wakeLabel = txt("เวลาตื่นนอน");
-        wakeLabel.setTextSize(18);
-        put(pg, wakeLabel, 10, 290, WRAP, WRAP);
+        wakeLabel.setTextSize(20);
+        centerX(pg, wakeLabel, 0, 800, WRAP, WRAP);
 
         // ชั่วโมงตื่นนอน
         wakeHourInput = numInp();
-        wakeHourInput.setInputType(
-                android.text.InputType.TYPE_CLASS_NUMBER
-        );
-        put(pg, wakeHourInput, 10, 325, WRAP, WRAP);
+        wakeHourInput.setInputType(android.text.InputType.TYPE_CLASS_NUMBER);
+        put(pg, wakeHourInput, 250, 1000, WRAP, WRAP);
+
 
         Txt wakeHourText = txt("ชั่วโมง");
-        put(pg, wakeHourText, 120, 325, WRAP, WRAP);
-
+        wakeHourText.setTextSize(18);
+        put(pg, wakeHourText,400, 1000, WRAP, WRAP);
 
         // นาทีตื่นนอน
         wakeMinuteInput = numInp();
         wakeMinuteInput.setInputType(android.text.InputType.TYPE_CLASS_NUMBER);
-        put(pg, wakeMinuteInput, 10, 360, WRAP, WRAP);
+        put(pg, wakeMinuteInput, 550, 1000, WRAP, WRAP);
 
         Txt wakeMinuteText = txt("นาที");
-        put(pg, wakeMinuteText, 120, 360, WRAP, WRAP);
+        wakeMinuteText.setTextSize(18);
+        put(pg, wakeMinuteText, 700, 1000, WRAP, WRAP);
+
 
         // เวลาเข้านอน
 
         Txt sleepLabel = txt("เวลาเข้านอน");
-        sleepLabel.setTextSize(18);
-        put(pg, sleepLabel, 10, 425, WRAP, WRAP);
+        sleepLabel.setTextSize(20);
+        centerX(pg, sleepLabel, 0, 1200, WRAP, WRAP);
 
 
         // ชั่วโมงเข้านอน
         sleepHourInput = numInp();
-        sleepHourInput.setInputType(
-                android.text.InputType.TYPE_CLASS_NUMBER
-        );
-        put(pg, sleepHourInput, 10, 460, WRAP, WRAP);
+        sleepHourInput.setInputType(android.text.InputType.TYPE_CLASS_NUMBER);
+        put(pg, sleepHourInput, 250, 1400, WRAP, WRAP);
 
         Txt sleepHourText = txt("ชั่วโมง");
-        put(pg, sleepHourText, 120, 460, WRAP, WRAP);
+        sleepHourText.setTextSize(18);
+        put(pg, sleepHourText, 400, 1400, WRAP, WRAP);
 
 
         // นาทีเข้านอน
@@ -92,10 +91,11 @@ public class Screen_1 extends BaseClass {
         sleepMinuteInput.setInputType(
                 android.text.InputType.TYPE_CLASS_NUMBER
         );
-        put(pg, sleepMinuteInput, 10, 495, WRAP, WRAP);
+        put(pg, sleepMinuteInput, 550, 1400, WRAP, WRAP);
 
         Txt sleepMinuteText = txt("นาที");
-        put(pg, sleepMinuteText, 120, 495, WRAP, WRAP);
+        sleepMinuteText.setTextSize(18);
+        put(pg, sleepMinuteText, 700, 1400, WRAP, WRAP);
 
 
         // =========================
@@ -103,7 +103,7 @@ public class Screen_1 extends BaseClass {
         // =========================
 
         Btn submitButton = btn("เริ่มต้นใช้งาน");
-        put(pg, submitButton, 10, 565, WRAP, WRAP);
+        centerX(pg, submitButton, 0, 1550, WRAP, WRAP);
 
         onTap(submitButton, this::submit);
     }
@@ -199,7 +199,7 @@ public class Screen_1 extends BaseClass {
 
     private boolean time(int hour, int minute) {
 
-        return hour >= 0 && hour < 24
+        return hour >= 0 && hour <= 24
                 && minute >= 0 && minute < 60;
     }
 
@@ -207,7 +207,6 @@ public class Screen_1 extends BaseClass {
     // =========================
     // บันทึกข้อมูล
     // =========================
-
     private void submit() {
 
         // อ่านน้ำหนัก
@@ -234,7 +233,7 @@ public class Screen_1 extends BaseClass {
         }
 
         // ตรวจสอบความถูกต้องของเวลา
-        if (time(wakeHour, wakeMinute) || !time(sleepHour, sleepMinute)) {
+        if (!time(wakeHour, wakeMinute) || !time(sleepHour, sleepMinute)) {
             setTxt(targetDrinkText, "กรุณากรอกเวลาให้ถูกต้อง");
             return;
         }
