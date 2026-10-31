@@ -32,21 +32,21 @@ public class Screen_5 extends BaseClass {
 
         // ชื่อแอป
         Txt title = txt("JIBNAM");
-        title.setTextSize(40);
-        put(pg, title, 10, 10, 340, 55);
+        title.setTextSize(48);
+        centerX(pg, title, 0,0 , WRAP, WRAP);
 
         // หัวข้อ
         Txt subtitle = txt("แก้ไขประวัติ");
         subtitle.setTextSize(24);
-        put(pg, subtitle, 10, 70, 340, 40);
+        centerX(pg, subtitle, 0, 180, WRAP, WRAP);
 
         // ตรวจสอบว่ามีข้อมูลแก้วหรือไม่
         if (oldDrink == null) {
             Txt errorText = txt("ไม่พบประวัติที่ต้องการแก้ไข");
-            put(pg, errorText, 10, 140, 340, 40);
+            centerX(pg, errorText, 0, 300, WRAP, WRAP);
 
             Btn backButton = btn("กลับหน้าหลัก");
-            put(pg, backButton, 110, 200, 140, 45);
+            centerX(pg, backButton, 0, 500, WRAP, WRAP);
             onTap(backButton, () -> go(Screen_2.class));
 
             return;
@@ -54,64 +54,71 @@ public class Screen_5 extends BaseClass {
 
         // ข้อมูลก่อนแก้ไข
         Txt oldTitle = txt("ข้อมูลก่อนแก้ไข");
-        oldTitle.setTextSize(20);
-        put(pg, oldTitle, 20, 130, 320, 35);
+        oldTitle.setTextSize(22);
+        put(pg, oldTitle, 20, 300, WRAP, WRAP);
 
         // ปริมาณน้ำเดิม
         double oldLiter = Double.parseDouble(oldDrink[2]);
         double oldMl = oldLiter * 1000;
 
         Txt oldAmountText = txt("ปริมาณน้ำ: " + formatAmount(oldMl) + " ml");
-        put(pg, oldAmountText, 20, 175, 320, 35);
+        oldAmountText.setTextSize(20);
+        put(pg, oldAmountText, 20, 400, WRAP, WRAP);
 
         // เวลาเดิม
         Txt oldTimeText = txt("เวลา: " + formatTime(oldDrink[3], oldDrink[4]));
-        put(pg, oldTimeText, 20, 210, 320, 35);
+        oldTimeText.setTextSize(20);
+        put(pg, oldTimeText, 20, 500, WRAP, WRAP);
 
         // ปริมาณน้ำใหม่
         Txt amountLabel = txt("ปริมาณน้ำ (ml)");
-        put(pg, amountLabel, 20, 275, 320, 30);
+        amountLabel.setTextSize(20);
+        centerX(pg, amountLabel, 0, 600, WRAP, WRAP);
 
         amountInput = numInp();
-        put(pg, amountInput, 20, 310, 320, 50);
+        amountInput.setTextSize(20);
+        centerX(pg, amountInput, 0, 700, WRAP, WRAP);
         setTxt(amountInput, formatAmount(oldMl));
 
         // เวลาใหม่
         Txt timeLabel = txt("เวลา");
-        put(pg, timeLabel, 20, 390, 320, 30);
-
+        timeLabel.setTextSize(20);
+        centerX(pg, timeLabel, 0, 850, WRAP, WRAP);
         // ชั่วโมง
         hourInput = numInp();
-        hourInput.setInputType(
-                android.text.InputType.TYPE_CLASS_NUMBER
-        );
-        hourInput.setHint("ชั่วโมง");
-        put(pg, hourInput, 20, 430, 130, 50);
+        hourInput.setTextSize(20);
+        hourInput.setInputType(android.text.InputType.TYPE_CLASS_NUMBER);
+        put(pg, hourInput, 250, 1000, WRAP, WRAP);
 
+        Txt HourText = txt("ชั่วโมง");
+        HourText.setTextSize(20);
+        put(pg, HourText,400, 1000, WRAP, WRAP);
         // นาที
         minuteInput = numInp();
-        minuteInput.setInputType(
-                android.text.InputType.TYPE_CLASS_NUMBER
-        );
-        minuteInput.setHint("นาที");
-        put(pg, minuteInput, 190, 430, 130, 50);
+        minuteInput.setTextSize(20);
+        minuteInput.setInputType(android.text.InputType.TYPE_CLASS_NUMBER);
+        put(pg, minuteInput, 650, 1000, WRAP, WRAP);
+
+        Txt MinuteText = txt("นาที");
+        MinuteText.setTextSize(20);
+        put(pg, MinuteText,800, 1000, WRAP, WRAP);
 
         msgTxt = txt("");
         msgTxt.setTextSize(25);
-        put(pg, msgTxt, 20, 500, 320, 30);
+        centerX(pg, msgTxt, 0, 1400, WRAP, WRAP);
 
         setTxt(hourInput, oldDrink[3]);
         setTxt(minuteInput, oldDrink[4]);
 
         // ปุ่มลบประวัติ
         Btn deleteButton = btn("ลบประวัติ");
-        put(pg, deleteButton, 20, 530, 150, 50);
-        onTap(deleteButton, this::deleteHistory);
+        put(pg, deleteButton, 200, 1200, WRAP, WRAP);
+        onTap(deleteButton,() ->deleteHistory());
 
         // ปุ่ม Submit
         Btn submitButton = btn("Submit");
-        put(pg, submitButton, 190, 530, 150, 50);
-        onTap(submitButton, this::submit);
+        put(pg, submitButton, 600, 1200, WRAP, WRAP);
+        onTap(submitButton,() -> submit());
     }
 
     // บันทึกการแก้ไข
@@ -133,7 +140,7 @@ public class Screen_5 extends BaseClass {
                 showMsg("ปริมาณน้ำต้องมากกว่า 0");
                 return;
             } else if (ml > 3000) {
-                showMsg("ปริมาณน้ำต้องไม่เกิน 3000");
+                showMsg("ปริมาณน้ำต้องไม่เกิน 3000 ml");
                 return;
             }
 
@@ -147,7 +154,7 @@ public class Screen_5 extends BaseClass {
             h = Integer.parseInt(hour);
             m = Integer.parseInt(minute);
 
-            if (h < 0 || h > 23 || m < 0 || m > 59) {
+            if (h < 0 || h > 24 || m < 0 || m > 59) {
                 showMsg("กรุณากรอกเวลาให้ถูกต้อง");
                 return;
             }
