@@ -12,6 +12,7 @@ import android.view.ViewGroup;                      // กล่องทุก�
 import android.widget.FrameLayout;                  // กล่องวางตาม x y
 import android.widget.LinearLayout;                 // กล่องเรียงต่อกัน
 import android.widget.ScrollView;                   // เลื่อนขึ้นลง
+import android.widget.TextView;                     // ตัวหนังสือทุกชนิด (setTxt getTxt)
 import androidx.appcompat.app.AppCompatActivity;    // หน้าจอ
 import androidx.appcompat.widget.AppCompatButton;   // ปุ่ม
 import androidx.appcompat.widget.AppCompatEditText; // ช่องกรอก
@@ -86,6 +87,11 @@ public abstract class BaseClass extends AppCompatActivity {
         v.setBackground(g);
     }
     protected void show(View v, boolean s) { v.setVisibility(s ? View.VISIBLE : View.INVISIBLE); }   // โชว์ / ซ่อน
+
+    // ค่า (ใช้แบบนี้ หรือเรียก .setText() ตรงก็ได้)
+    protected void setTxt(TextView t, String s) { t.setText(s); }                    // ตั้งข้อความ Txt Btn Inp
+    protected String getTxt(TextView t) { return t.getText().toString().trim(); }    // อ่านข้อความ (ตัดช่องว่างหัวท้าย)
+    protected void setImg(Img i, int id) { i.setImageResource(id); }                 // เปลี่ยนรูป เช่น R.drawable.bottle_0
 
     // กด / เวลา
     protected void onTap(View v, Runnable r) { v.setOnClickListener(x -> r.run()); }   // กดแล้วทำ r
