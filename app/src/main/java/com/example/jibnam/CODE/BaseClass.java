@@ -10,6 +10,7 @@ import android.view.Gravity;                        // ตำแหน่งก�
 import android.view.View;                           // ชิ้นส่วนทุกชนิด
 import android.view.ViewGroup;                      // กล่องทุกชนิด
 import android.widget.FrameLayout;                  // กล่องวางตาม x y
+import android.widget.GridLayout;                   // กล่องตาราง แถว × คอลัมน์
 import android.widget.LinearLayout;                 // กล่องเรียงต่อกัน
 import android.widget.ScrollView;                   // เลื่อนขึ้นลง
 import android.widget.TextView;                     // ตัวหนังสือทุกชนิด (setTxt getTxt)
@@ -25,6 +26,7 @@ public abstract class BaseClass extends AppCompatActivity {
     public static class Box extends FrameLayout { public Box(Context c) { super(c); } }              // กล่อง x y
     public static class Col extends LinearLayout { public Col(Context c) { super(c); setOrientation(VERTICAL); } }   // เรียงลง
     public static class Row extends LinearLayout { public Row(Context c) { super(c); } }            // เรียงขวา
+    public static class Grid extends GridLayout { public Grid(Context c) { super(c); } }            // ตาราง
     public static class Txt extends AppCompatTextView { public Txt(Context c) { super(c); } }       // ตัวหนังสือ
     public static class Btn extends AppCompatButton { public Btn(Context c) { super(c); } }         // ปุ่ม
     public static class Inp extends AppCompatEditText { public Inp(Context c) { super(c); } }       // ช่องกรอก
@@ -54,6 +56,7 @@ public abstract class BaseClass extends AppCompatActivity {
     protected Box box() { return new Box(this); }
     protected Col col() { return new Col(this); }
     protected Row row() { return new Row(this); }
+    protected Grid grid(int cols) { Grid g = new Grid(this); g.setColumnCount(cols); return g; }   // ตาราง cols คอลัมน์ เช่น grid(7) = ปฏิทิน
 
     // วาง
     protected void put(Box p, View v, int x, int y, int w, int h) {   // ห่างซ้าย x ห่างบน y
@@ -79,6 +82,12 @@ public abstract class BaseClass extends AppCompatActivity {
     }
     protected void add(LinearLayout p, View v, int w, int h) { p.addView(v, new LinearLayout.LayoutParams(w, h)); }   // ต่อท้ายใน Col / Row
     protected void center(LinearLayout p) { p.setGravity(Gravity.CENTER); }   // ของใน Col / Row อยู่กลาง
+    protected void add(Grid p, View v, int w, int h) {                        // ต่อท้ายใน Grid (เต็มแถวแล้วขึ้นแถวใหม่เอง)
+        GridLayout.LayoutParams lp = new GridLayout.LayoutParams();
+        lp.width = w;
+        lp.height = h;
+        p.addView(v, lp);
+    }
     protected void clr(ViewGroup p) { p.removeAllViews(); }                   // ล้างกล่อง
     protected void border(View v) {                                           // กรอบดำ พื้นขาว
         GradientDrawable g = new GradientDrawable();
@@ -86,7 +95,10 @@ public abstract class BaseClass extends AppCompatActivity {
         g.setStroke(3, Color.BLACK);
         v.setBackground(g);
     }
-    protected void show(View v, boolean s) { v.setVisibility(s ? View.VISIBLE : View.INVISIBLE); }   // โชว์ / ซ่อน
+    protected void show(View v, boolean s) {                                 // โชว์ / ซ่อน
+        if (s) v.setVisibility(View.VISIBLE);
+        else v.setVisibility(View.INVISIBLE);
+    }
 
     // ค่า (ใช้แบบนี้ หรือเรียก .setText() ตรงก็ได้)
     protected void setTxt(TextView t, String s) { t.setText(s); }                    // ตั้งข้อความ Txt Btn Inp
@@ -99,7 +111,7 @@ public abstract class BaseClass extends AppCompatActivity {
     protected void cancel(Runnable r) { pg.removeCallbacks(r); }                      // ยกเลิก later
 
     // หน้า
-    protected void go(Class<?> c) { startActivity(new Intent(this, c)); }                                 // ไปหน้า c
-    protected void goWith(Class<?> c, String k, String v) { startActivity(new Intent(this, c).putExtra(k, v)); }   // ไปพร้อมส่งค่า
+    protected void go(Class c) { startActivity(new Intent(this, c)); }                                 // ไปหน้า c
+    protected void goWith(Class c, String k, String v) { startActivity(new Intent(this, c).putExtra(k, v)); }   // ไปพร้อมส่งค่า
     protected String arg(String k) { return getIntent().getStringExtra(k); }                             // รับค่า (ไม่มี = null)
 }

@@ -1,4 +1,180 @@
 package com.example.jibnam.CODE;
 
-public class Notification {
+import android.app.Activity;                               // หน้าจอ (ใช้ขอสิทธิ์แจ้งเตือน)
+import android.app.AlarmManager;                           // ตั้งปลุกให้ระบบเรียกเรากลับมา
+import android.app.PendingIntent;                          // งานที่ฝากระบบไว้ทำตอนถึงเวลา
+import android.content.BroadcastReceiver;                  // ตัวรับ ตอนถึงเวลาปลุก
+import android.content.Context;                            // ตัวแทนแอป
+import android.content.Intent;                             // ใบสั่ง (ปลุกตัวนี้ / เปิดแอป)
+import android.content.pm.PackageManager;                  // เช็กว่าได้สิทธิ์ไหม
+import android.os.Build;                                   // เวอร์ชัน Android ของเครื่อง
+import androidx.core.app.ActivityCompat;                   // ขอสิทธิ์
+import androidx.core.app.NotificationChannelCompat;        // ช่องแจ้งเตือน (Android 8+ ต้องมี)
+import androidx.core.app.NotificationCompat;               // สร้างแจ้งเตือน
+import androidx.core.app.NotificationManagerCompat;        // ส่งแจ้งเตือน
+import androidx.core.content.ContextCompat;                // เช็กสิทธิ์
+
+import com.example.jibnam.DATA.Data;
+import com.example.jibnam.DATA.DataApi;
+
+import java.text.SimpleDateFormat;
+import java.util.Calendar;
+import java.util.List;
+import java.util.Locale;
+
+/*
+ * Notification : เตือนดื่มน้ำ
+ *   เอาเวลาตื่น - นอน (บรรทัด U ล่าสุด) แบ่งเท่าๆ กัน 5 ช่วง
+ *   ทุกครั้งที่จบ 1 ช่วง ระบบจะปลุก onReceive → check() → ถ้ามีข้อความ ก็เด้งแจ้งเตือน → ตั้งปลุกรอบถัดไป
+ *
+ *   check() คิดแบบนี้ (เรียงตามลำดับ)
+ *     1. แจ้งเตือนปิดอยู่ / ยังไม่มีผู้ใช้                 → ไม่เตือน
+ *     2. หายไปเต็มวัน (ไม่ได้บันทึกอะไรเลย) เป็นวันที่ 1 3 7 14 28  → BACK (วันละครั้ง ตอนจบช่วง 1)
+ *     3. วันนี้ดื่มเกิน เป้า × OVER_X                     → OVER
+ *     4. นับช่วงที่ไม่ได้ดื่มติดกัน ย้อนจากช่วงที่เพิ่งจบ   → STACK[จำนวนช่วง]  (ดื่มในช่วงล่าสุด = ไม่เตือน)
+ *
+ * เรียกใช้ : Notification.start(this);   ← ใส่ใน Screen_2 แล้ว (ขอสิทธิ์ + ตั้งปลุกรอบแรก)
+ */
+public class Notification extends BroadcastReceiver {
+
+    // ===== ข้อความ (แก้ได้ตรงนี้) =====
+    static final String[] STACK = {
+            "",
+            "คุณขาดการดื่มน้ำมา 1 ช่วงแล้ว อย่าลืมดื่มน้ำนะ!",            // ขาด 1 ช่วง
+            "คุณไม่ได้ดื่มน้ำซักพักแล้วนะ คอแห้งอยู่รึเปล่า",              // ขาด 2 ช่วง
+            "คุณขาดน้ำมานานแล้ว ควรดื่มน้ำได้แล้วนะ",                    // ขาด 3 ช่วง
+            "คุณแทบไม่ได้ดื่มน้ำมาทั้งวันแล้ว ควรดื่มน้ำเดี๋ยวนี้",            // ขาด 4 ช่วง
+            "คุณไม่ได้ดื่มน้ำมาทั้งวันแล้วนะ อาจขาดน้ำได้ ควรดื่มน้ำ",          // ขาด 5 ช่วง
+    };
+    static final String OVER = "คุณดื่มน้ำมากเกินไปแล้ว ควรค่อยๆดื่มนะ";      // ดื่มเกิน
+    static final String BACK = "อย่าลืมดื่มน้ำและบันทึกข้อมูลของคุณด้วยนะ";    // หายไปทั้งวัน
+    static final int[] BACK_DAYS = {1, 3, 7, 14, 28};                    // หายไปวันที่เท่าไหร่ถึงเตือน
+    static final double OVER_X = 1.5;                                    // ดื่มเกินเป้ากี่เท่า = มากเกินไป
+
+    public static String[] allMsgs() {              // ข้อความทุกแบบ (ไว้ปุ่มทดสอบใน Screen_2 วนดู)
+        return new String[]{
+                "[ขาด 1 ช่วง] " + STACK[1],
+                "[ขาด 2 ช่วง] " + STACK[2],
+                "[ขาด 3 ช่วง] " + STACK[3],
+                "[ขาด 4 ช่วง] " + STACK[4],
+                "[ขาด 5 ช่วง] " + STACK[5],
+                "[ดื่มเกิน] " + OVER,
+                "[หายไป 1 3 7 14 28 วัน] " + BACK,
+        };
+    }
+
+    // ===== เรียกจากหน้าจอ =====
+    public static void start(Activity a) {          // ขอสิทธิ์แจ้งเตือน (Android 13+) แล้วตั้งปลุกรอบถัดไป
+        if (!allowed(a)) ActivityCompat.requestPermissions(a, new String[]{"android.permission.POST_NOTIFICATIONS"}, 1);
+        next(a);
+    }
+
+    @Override
+    public void onReceive(Context c, Intent i) {    // ถึงเวลา (จบ 1 ช่วง): เช็ก → เตือน → ตั้งรอบถัดไป
+        Data data = new Data(DataApi.realDataFile(c));
+        String msg = check(data, Data.today(), nowMin());
+        if (msg != null) show(c, msg);
+        next(c);
+    }
+
+    // ===== คิดว่าจะเตือนอะไร (null = ไม่เตือน) =====
+    public static String check(Data data, String today, int now) {   // now = นาทีของวัน เช่น 14:30 = 870
+        String[] u = data.lastUser();
+        if (u == null || !data.notiOn()) return null;                // 1. ไม่มีผู้ใช้ / ปิดแจ้งเตือน
+        int[] b = slots(u);
+        int k = 0;                                                   // จบไปแล้วกี่ช่วง (0..5)
+        for (int j = 1; j <= 5; j++) if (now >= b[j]) k = j;
+        if (k == 0) return null;                                     // ยังไม่จบช่วงแรก
+
+        int away = awayDays(data, today);                            // 2. หายไปกี่วันเต็ม
+        if (away >= 1) {
+            if (k != 1) return null;                                 //    วันละครั้ง (ตอนจบช่วง 1)
+            for (int i = 0; i < BACK_DAYS.length; i++) if (BACK_DAYS[i] == away) return BACK;
+            return null;
+        }
+        double tg = WaterCalculate.targetL(Double.parseDouble(u[2]));
+        if (data.sumLiters(today) > tg * OVER_X) return OVER;        // 3. ดื่มเกิน
+
+        int miss = 0;                                                // 4. ขาดติดกันกี่ช่วง
+        for (int j = k; j >= 1; j--) {
+            if (data.drankBetween(today, b[j - 1], b[j]) > 0) break; //    เจอช่วงที่ดื่ม = หยุดนับ
+            miss++;
+        }
+        if (miss == 0) return null;                                  //    ช่วงล่าสุดดื่มแล้ว = ไม่เตือน
+        return STACK[miss];
+    }
+
+    public static int[] slots(String[] u) {         // { ตื่น, จบช่วง1, จบช่วง2, จบช่วง3, จบช่วง4, นอน } หน่วยนาทีของวัน
+        int wake = Integer.parseInt(u[3]) * 60 + Integer.parseInt(u[4]);
+        int sleep = Integer.parseInt(u[5]) * 60 + Integer.parseInt(u[6]);
+        if (sleep <= wake) sleep += 24 * 60;                          // นอนหลังเที่ยงคืน
+        int len = (sleep - wake) / 5;                                // 1 ช่วงยาวกี่นาที
+        return new int[]{wake, wake + len, wake + len * 2, wake + len * 3, wake + len * 4, sleep};
+    }
+
+    static int awayDays(Data data, String today) {  // หายไปกี่วันเต็ม (0 = เมื่อวาน/วันนี้ยังบันทึกอยู่)
+        String last = data.lastUser()[1].substring(0, 8);            // วันล่าสุดที่ทำอะไรในแอป (U หรือ D)
+        List<String[]> ds = data.getDrinks(null);
+        if (!ds.isEmpty()) {
+            String d = ds.get(ds.size() - 1)[1].substring(0, 8);
+            if (d.compareTo(last) > 0) last = d;
+        }
+        try {
+            SimpleDateFormat f = new SimpleDateFormat("yyyyMMdd", Locale.US);
+            long diff = f.parse(today).getTime() - f.parse(last).getTime();
+            return (int) Math.round(diff / 86400000.0) - 1;
+        } catch (Exception e) {
+            return 0;
+        }
+    }
+
+    // ===== ตั้งปลุก / เด้งแจ้งเตือน =====
+    static void next(Context c) {                   // ตั้งปลุกตอนจบช่วงถัดไป (วันนี้ไม่เหลือ = ช่วงแรกของพรุ่งนี้)
+        String[] u = new Data(DataApi.realDataFile(c)).lastUser();
+        if (u == null) return;
+        int[] b = slots(u);
+        long t = 0;
+        for (int day = 0; day <= 1 && t == 0; day++) {
+            for (int j = 1; j <= 5; j++) {
+                Calendar cal = Calendar.getInstance();
+                cal.set(Calendar.HOUR_OF_DAY, 0);
+                cal.set(Calendar.MINUTE, 0);
+                cal.set(Calendar.SECOND, 0);
+                cal.set(Calendar.MILLISECOND, 0);
+                cal.add(Calendar.DAY_OF_MONTH, day);
+                cal.add(Calendar.MINUTE, b[j]);
+                if (cal.getTimeInMillis() > System.currentTimeMillis() + 30000) { t = cal.getTimeInMillis(); break; }
+            }
+        }
+        PendingIntent pi = PendingIntent.getBroadcast(c, 0, new Intent(c, Notification.class),
+                PendingIntent.FLAG_UPDATE_CURRENT | PendingIntent.FLAG_IMMUTABLE);
+        AlarmManager am = (AlarmManager) c.getSystemService(Context.ALARM_SERVICE);
+        am.setAndAllowWhileIdle(AlarmManager.RTC_WAKEUP, t, pi);    // ไม่เป๊ะ อาจช้าไปบ้าง (ไม่ต้องขอสิทธิ์เพิ่ม)
+    }
+
+    public static void show(Context c, String msg) {   // เด้งแจ้งเตือน กดแล้วเปิดแอป
+        if (!allowed(c)) return;
+        NotificationManagerCompat nm = NotificationManagerCompat.from(c);
+        nm.createNotificationChannel(new NotificationChannelCompat.Builder("water", NotificationManagerCompat.IMPORTANCE_HIGH)
+                .setName("เตือนดื่มน้ำ").build());
+        PendingIntent open = PendingIntent.getActivity(c, 0, new Intent(c, MainActivity.class), PendingIntent.FLAG_IMMUTABLE);
+        nm.notify(1, new NotificationCompat.Builder(c, "water")
+                .setSmallIcon(android.R.drawable.ic_dialog_info)
+                .setContentTitle("JIBNAM")
+                .setContentText(msg)
+                .setStyle(new NotificationCompat.BigTextStyle().bigText(msg))
+                .setContentIntent(open)
+                .setAutoCancel(true)
+                .build());
+    }
+
+    static boolean allowed(Context c) {             // ได้สิทธิ์แจ้งเตือนไหม (ต่ำกว่า Android 13 ได้เลย)
+        return Build.VERSION.SDK_INT < 33
+                || ContextCompat.checkSelfPermission(c, "android.permission.POST_NOTIFICATIONS") == PackageManager.PERMISSION_GRANTED;
+    }
+
+    public static int nowMin() {                           // ตอนนี้กี่นาทีของวัน
+        Calendar cal = Calendar.getInstance();
+        return cal.get(Calendar.HOUR_OF_DAY) * 60 + cal.get(Calendar.MINUTE);
+    }
 }

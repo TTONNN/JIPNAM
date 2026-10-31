@@ -60,8 +60,11 @@ public class Data {
         int m = Integer.parseInt(sn.substring(10, 12));
         double total = sumLiters(sn.substring(0, 8)) + liters;                    // ดื่มแล้วทั้งวัน รวมแก้วนี้
         String[] u = lastUser();                                                   // เวลาตื่น/นอน จาก Screen_1 (บรรทัด U ล่าสุด)
-        String wakeSleep = u == null ? "0;0;0;0" : u[3] + ";" + u[4] + ";" + u[5] + ";" + u[6];   // ยังไม่มี U = 0
-        addLine("D;" + sn + ";" + liters + ";" + h + ";" + m + ";" + targetL + ";" + r3(total) + ";" + (notiOn() ? "on" : "off")
+        String wakeSleep = "0;0;0;0";                                              // ยังไม่มี U = 0
+        if (u != null) wakeSleep = u[3] + ";" + u[4] + ";" + u[5] + ";" + u[6];
+        String noti = "off";                                                       // แจ้งเตือน ใช้ค่าเดิมของแก้วก่อนหน้า
+        if (notiOn()) noti = "on";
+        addLine("D;" + sn + ";" + liters + ";" + h + ";" + m + ";" + targetL + ";" + r3(total) + ";" + noti
                 + ";" + wakeSleep);                                               // ต่อท้าย: ตื่นชม.;ตื่นนาที;นอนชม.;นอนนาที
         return sn;
     }
@@ -88,7 +91,8 @@ public class Data {
         List<String[]> all = readAll();
         int i = find(all, sn);
         if (i < 0) return;
-        String noti = all.get(i).length > 7 ? all.get(i)[7] : "off";
+        String noti = "off";
+        if (all.get(i).length > 7) noti = all.get(i)[7];
         all.set(i, new String[]{""});            // เขียนทับด้วยบรรทัดว่าง
         fixTotals(all, sn.substring(0, 8));
         int last = lastD(all);                   // ลบแก้วล่างสุด → ย้ายค่าแจ้งเตือนไปแก้วที่เป็นล่างสุดแทน
@@ -100,7 +104,8 @@ public class Data {
         List<String[]> all = readAll();
         int last = lastD(all);
         if (last < 0) return;                    // ยังไม่เคยดื่ม = ยังไม่มีบรรทัดให้เก็บ
-        setField(all, last, 7, on ? "on" : "off");
+        if (on) setField(all, last, 7, "on");
+        else setField(all, last, 7, "off");
         writeAll(all);
     }
 
@@ -108,7 +113,9 @@ public class Data {
 
     public List<String[]> getDrinks(String day) {   // แก้วของวัน day (yyyyMMdd, null = ทุกวัน) เรียงบน → ล่าง
         List<String[]> out = new ArrayList<>();
-        for (String[] p : readAll()) {
+        List<String[]> all = readAll();
+        for (int i = 0; i < all.size(); i++) {
+            String[] p = all.get(i);
             if (p[0].equals("D") && (day == null || p[1].startsWith(day))) out.add(p);
         }
         return out;
@@ -117,18 +124,22 @@ public class Data {
     public String[] getDrink(String sn) {   // แก้ว sn = { "D", sn, ลิตร, ชม., นาที, ต้องดื่ม, ดื่มแล้วทั้งวัน, แจ้งเตือน, ตื่นชม., ตื่นนาที, นอนชม., นอนนาที } ไม่มี = null
         List<String[]> all = readAll();
         int i = find(all, sn);
-        return i < 0 ? null : all.get(i);
+        if (i < 0) return null;
+        return all.get(i);
     }
 
     public String[] lastUser() {            // บรรทัด U ล่างสุด = { "U", sn, น้ำหนัก, ตื่นชม., ตื่นนาที, นอนชม., นอนนาที } ไม่มี = null
         String[] u = null;
-        for (String[] p : readAll()) if (p[0].equals("U")) u = p;
+        List<String[]> all = readAll();
+        for (int i = 0; i < all.size(); i++) if (all.get(i)[0].equals("U")) u = all.get(i);
         return u;
     }
 
     public List<String[]> getLines(String type, String day) {   // บรรทัดชนิด type ของวัน day (null = ทุกวัน) เช่น "E"
         List<String[]> out = new ArrayList<>();
-        for (String[] p : readAll()) {
+        List<String[]> all = readAll();
+        for (int i = 0; i < all.size(); i++) {
+            String[] p = all.get(i);
             if (p[0].equals(type) && (day == null || p[1].startsWith(day))) out.add(p);
         }
         return out;
@@ -136,13 +147,16 @@ public class Data {
 
     public double sumLiters(String day) {   // ดื่มแล้วทั้งวัน day (ลิตร)
         double s = 0;
-        for (String[] d : getDrinks(day)) s += Double.parseDouble(d[2]);
+        List<String[]> ds = getDrinks(day);
+        for (int i = 0; i < ds.size(); i++) s += Double.parseDouble(ds.get(i)[2]);
         return r3(s);
     }
 
     public double drankBetween(String day, int fromMin, int toMin) {   // ดื่มกี่ลิตรในช่วง [fromMin, toMin) นาทีของวัน (7:30 = 450)
         double s = 0;                                                   // ← Notification / Screen_6 ใช้ดูแต่ละช่วง
-        for (String[] d : getDrinks(day)) {
+        List<String[]> ds = getDrinks(day);
+        for (int i = 0; i < ds.size(); i++) {
+            String[] d = ds.get(i);
             int t = Integer.parseInt(d[3]) * 60 + Integer.parseInt(d[4]);
             if (t >= fromMin && t < toMin) s += Double.parseDouble(d[2]);
         }
@@ -216,7 +230,7 @@ public class Data {
 
     private void writeAll(List<String[]> all) {   // เขียนทับทั้งไฟล์ด้วย all (บรรทัดว่างก็เขียนกลับเป็นบรรทัดว่าง)
         try (FileWriter w = new FileWriter(file, false)) {
-            for (String[] p : all) w.write(String.join(";", p) + "\n");
+            for (int i = 0; i < all.size(); i++) w.write(String.join(";", all.get(i)) + "\n");
         } catch (IOException e) {
             throw new RuntimeException(e);
         }

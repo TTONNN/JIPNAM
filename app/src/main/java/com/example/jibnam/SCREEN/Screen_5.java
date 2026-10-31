@@ -106,12 +106,12 @@ public class Screen_5 extends BaseClass {
         // ปุ่มลบประวัติ
         Btn deleteButton = btn("ลบประวัติ");
         put(pg, deleteButton, 20, 530, 150, 50);
-        onTap(deleteButton, this::deleteHistory);
+        onTap(deleteButton, () -> deleteHistory());
 
         // ปุ่ม Submit
         Btn submitButton = btn("Submit");
         put(pg, submitButton, 190, 530, 150, 50);
-        onTap(submitButton, this::submit);
+        onTap(submitButton, () -> submit());
     }
 
     // บันทึกการแก้ไข

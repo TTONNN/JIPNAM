@@ -36,7 +36,7 @@ public class Screen_1 extends BaseClass {
         Btn calculateButton = btn("คำนวณ");
         centerX(pg, calculateButton, 0, 450, WRAP, WRAP);
 
-        onTap(calculateButton, this::calculateTarget);
+        onTap(calculateButton, () -> calculateTarget());
 
 
         // แสดงปริมาณน้ำที่แนะนำ
@@ -105,7 +105,7 @@ public class Screen_1 extends BaseClass {
         Btn submitButton = btn("เริ่มต้นใช้งาน");
         centerX(pg, submitButton, 0, 1550, WRAP, WRAP);
 
-        onTap(submitButton, this::submit);
+        onTap(submitButton, () -> submit());
     }
 
 

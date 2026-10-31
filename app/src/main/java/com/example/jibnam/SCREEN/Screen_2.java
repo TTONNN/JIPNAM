@@ -41,6 +41,7 @@ public class Screen_2 extends BaseClass {
     Btn notiBtn;    // ปุ่ม การแจ้งเตือน (เปิด)/(ปิด)
 
     Runnable hidePlus = () -> show(plusTx, false);   // ซ่อน "+x L"
+    int testI = 0;                                    // ปุ่มทดสอบ: กดครั้งถัดไปจะโชว์ข้อความที่เท่าไหร่
 
     @Override
     protected void build(Box pg) {          // วางของแบบนับพิกัด put(pg, ของ, x, y, กว้าง, สูง) หน่วย px
@@ -51,14 +52,13 @@ public class Screen_2 extends BaseClass {
         wtKg = Double.parseDouble(data.lastUser()[2]);
         tgL = WaterCalculate.targetL(wtKg);
 
-        // ปุ่มทดสอบ ไปหน้า 1 และหน้า 6
-        put(pg, txt("Screen_2"), 30, 30, WRAP, WRAP);
-        Btn toS1 = btn("ไป Screen_1");
+        // ปุ่มบนสุด: แก้ไขข้อมูลส่วนตัว (หน้า 1) และหน้า 6
+        Btn toS1 = btn("แก้ไขข้อมูลส่วนตัว");
         onTap(toS1, () -> go(Screen_1.class));
-        put(pg, toS1, 30, 90, 450, WRAP);
+        put(pg, toS1, 30, 30, 510, WRAP);
         Btn toS6 = btn("ไป Screen_6");
         onTap(toS6, () -> go(Screen_6.class));
-        put(pg, toS6, 510, 90, 450, WRAP);
+        put(pg, toS6, 570, 30, 480, WRAP);
 
         // ปุ่มแจ้งเตือน: กดสลับ เปิด/ปิด แล้วเซฟลงไฟล์ (ตัวท้ายสุดของบรรทัด D ล่างสุด)
         notiBtn = btn("");
@@ -66,57 +66,65 @@ public class Screen_2 extends BaseClass {
             data.setNoti(!data.notiOn());
             showNoti();
         });
-        put(pg, notiBtn, 30, 255, 600, WRAP);
+        put(pg, notiBtn, 30, 170, 600, WRAP);
         showNoti();
 
+        // ปุ่มทดสอบแจ้งเตือน: กด 1 ครั้ง = เด้ง 1 ข้อความ ไล่ทีละแบบ ครบ 7 แบบแล้ววนกลับแบบแรก (ไว้เทส ลบได้)
+        Btn testBtn = btn("ทดสอบแจ้งเตือน");
+        onTap(testBtn, () -> testNoti());
+        put(pg, testBtn, 660, 170, 390, WRAP);
+
         // ข้อมูลด้านบน
-        put(pg, txt("น้ำหนักตัว " + fmt(wtKg)), 30, 420, WRAP, WRAP);
-        put(pg, txt("ปริมาณน้ำที่ควรดื่ม " + fmt(tgL) + " L"), 30, 480, WRAP, WRAP);
+        put(pg, txt("น้ำหนักตัว " + fmt(wtKg)), 30, 320, WRAP, WRAP);
+        put(pg, txt("ปริมาณน้ำที่ควรดื่ม " + fmt(tgL) + " L"), 30, 370, WRAP, WRAP);
         drankTx = txt("");
-        put(pg, drankTx, 30, 540, WRAP, WRAP);
+        put(pg, drankTx, 30, 420, WRAP, WRAP);
         plusTx = txt("");
         show(plusTx, false);
-        put(pg, plusTx, 30, 600, WRAP, WRAP);
+        put(pg, plusTx, 30, 470, WRAP, WRAP);
 
         // รูปขวด กว้าง 390 สูง 540 + % ทับกลางขวด
         btlImg = img();
-        put(pg, btlImg, 345, 675, 390, 540);
+        put(pg, btlImg, 345, 520, 390, 540);
         pctTx = txt("");
-        put(pg, pctTx, 465, 930, WRAP, WRAP);
+        put(pg, pctTx, 465, 775, WRAP, WRAP);
 
         // ปุ่มภาชนะ 2 แถว แถวละ 2 ปุ่ม
         for (int i = 0; i < CUPS.length; i++) {
-            int x = (i % 2 == 0) ? 105 : 555;      // ซ้าย / ขวา
-            int y = (i < 2) ? 1245 : 1395;          // แถวบน / แถวล่าง
+            int x = 555;                           // ขวา
+            if (i % 2 == 0) x = 105;               // ซ้าย (ปุ่มที่ 0, 2)
+            int y = 1230;                          // แถวล่าง
+            if (i < 2) y = 1090;                   // แถวบน (ปุ่มที่ 0, 1)
             cupBtn(pg, i, x, y);
         }
 
         // ช่องกรอก + หน่วย
         amtIn = numInp();
-        put(pg, amtIn, 360, 1560, 360, WRAP);
+        put(pg, amtIn, 360, 1380, 360, WRAP);
         unitTx = txt(unit);
-        put(pg, unitTx, 735, 1605, WRAP, WRAP);
+        put(pg, unitTx, 735, 1425, WRAP, WRAP);
 
         Btn subBtn = btn("submit");
-        onTap(subBtn, this::submit);
-        put(pg, subBtn, 390, 1725, 300, WRAP);
+        onTap(subBtn, () -> submit());
+        put(pg, subBtn, 390, 1530, 300, WRAP);
 
         // ออกกำลังกาย ฝั่งขวา
         Btn exBtn = btn("ออกกำลังกาย");
         onTap(exBtn, () -> go(Screen_3.class));
-        put(pg, exBtn, 630, 1890, 420, WRAP);
+        put(pg, exBtn, 630, 1680, 420, WRAP);
 
         // หัวข้อประวัติซ้าย, Read More ขวา
-        put(pg, txt("ประวัติ (วันนี้)"), 30, 2100, WRAP, WRAP);
+        put(pg, txt("ประวัติ (วันนี้)"), 30, 1875, WRAP, WRAP);
         Btn moreBtn = btn("Read More");
         onTap(moreBtn, () -> go(Screen_4.class));
-        put(pg, moreBtn, 630, 2055, 420, WRAP);
+        put(pg, moreBtn, 630, 1830, 420, WRAP);
 
         hisBox = box();                          // กล่องประวัติ (วาดใหม่ใน refresh)
-        put(pg, hisBox, 0, 2220, WRAP, WRAP);
+        put(pg, hisBox, 0, 1990, WRAP, WRAP);
 
         amtIn.setText(CUPS[0][1]);       // เริ่มต้นใส่ปริมาณภาชนะแรก
         refresh();
+        Notification.start(this);        // ขอสิทธิ์แจ้งเตือน + ตั้งเตือนดื่มน้ำรอบถัดไป (CODE/Notification)
     }
 
     // ===== หน้าจอ =====
@@ -156,8 +164,16 @@ public class Screen_2 extends BaseClass {
         pctTx.setText(pctTxt());          // % ทศนิยม 2 ตำแหน่ง
     }
 
+    void testNoti() {                    // กดปุ่มทดสอบ: เด้งข้อความที่ testI แล้วเลื่อนไปข้อความถัดไป (ครบแล้วกลับไปแบบแรก)
+        String[] all = Notification.allMsgs();
+        Notification.show(this, "ทดสอบ " + (testI + 1) + "/" + all.length + " " + all[testI]);
+        testI++;
+        if (testI >= all.length) testI = 0;
+    }
+
     void showNoti() {                    // ข้อความบนปุ่มแจ้งเตือน ดึงจากไฟล์
-        notiBtn.setText("การแจ้งเตือน (" + (data.notiOn() ? "เปิด" : "ปิด") + ")");
+        if (data.notiOn()) notiBtn.setText("การแจ้งเตือน (เปิด)");
+        else notiBtn.setText("การแจ้งเตือน (ปิด)");
     }
 
     void cupBtn(Box pg, int i, int x, int y) {   // ปุ่มภาชนะที่ i ที่ (x, y): กดแล้วเติมปริมาณ + หน่วยในช่องกรอก
@@ -199,12 +215,14 @@ public class Screen_2 extends BaseClass {
     }
 
     String pctTxt() {                    // % แบบละเอียด ทศนิยม 2 ตำแหน่ง เช่น "52.38%"
-        double p = tgL <= 0 ? 0 : drkL / tgL * 100;
+        double p = 0;
+        if (tgL > 0) p = drkL / tgL * 100;
         return String.format(Locale.US, "%.2f%%", p);
     }
 
     static double toL(double v, String u) {   // แปลงเป็นลิตร (ml ÷ 1000, L ใช้ตรงๆ)
-        return "L".equals(u) ? v : v / 1000.0;
+        if ("L".equals(u)) return v;
+        return v / 1000.0;
     }
 
     // ===== จัดข้อความ =====
