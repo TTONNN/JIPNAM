@@ -78,7 +78,7 @@ public class Screen_4 extends BaseClass {
         lt.setTextSize(20);
         bold(lt);
         put(pg, lt, 30, ly, WRAP, WRAP);
-        legend(pg, ly + 75, "🟦 สีฟ้า = ดื่มเยอะเกินไป (120% ขึ้นไป)");
+        legend(pg, ly + 75, "🟦 สีฟ้า = ดื่มเยอะ (120% ขึ้นไป)");
         legend(pg, ly + 145, "🟩 สีเขียว = ดื่มครบแล้ว (100% - 119%)");
         legend(pg, ly + 215, "🟨 สีเหลือง = ดื่มไปแล้วครึ่งนึง (50% - 99%)");
         legend(pg, ly + 285, "🟥 สีแดง = ดื่มน้อยมาก (ต่ำกว่า 50%)");

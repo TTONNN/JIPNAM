@@ -12,6 +12,7 @@ public class Screen_2 extends BaseClass {
     double wtKg;                         // น้ำหนักตัว (กก.) จากบรรทัดล่างสุด
     double tgL;                          // เป้าน้ำที่ควรดื่ม (ลิตร) = WaterCalculate.targetL(wtKg)
     static final int[] CUP_IMG = {R.drawable.b_cone, R.drawable.b_glass, R.drawable.b_bottle_s};   // รูปปุ่ม กรวย 115ml แก้ว 250ml ขวดเล็ก 600ml
+    static final int MAX_ML = 3000;                // กรอกได้มากสุดครั้งละ (ml) เท่ากับ Screen_5
     static final int[] CUP_ML = {115, 250, 600};                                                     // กดแล้วใส่ช่องกรอก (ml)
 
     Data data;                           // ไฟล์ RealData.txt (ข้อมูลจริงอยู่ในไฟล์ หน้าจอดึงมาโชว์อย่างเดียว)
@@ -130,6 +131,10 @@ public class Screen_2 extends BaseClass {
             return;                      // ว่าง / ไม่ใช่ตัวเลข → ไม่ทำอะไร
         }
         if (v <= 0) return;
+        if (v > MAX_ML) {                // เกิน 3000 ml → ไม่บันทึก บอกในบรรทัดเพิ่มน้ำแทน
+            plusTx.setText("กรอกได้ไม่เกิน " + MAX_ML + " ml");
+            return;
+        }
 
         double l = v / 1000.0;           // ml → ลิตร (ในไฟล์เก็บเป็นลิตร)
         data.addDrink(l, tgL);           // เก็บลงไฟล์ (Data ใส่ serial เวลาตอนนี้ + ยอดดื่มทั้งวันให้เอง)
