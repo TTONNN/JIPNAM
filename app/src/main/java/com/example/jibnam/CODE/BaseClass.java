@@ -8,6 +8,7 @@ import android.graphics.drawable.GradientDrawable;  // กรอบ
 import android.os.Bundle;                           // ตอนเปิดหน้า
 import android.text.InputType;                      // ช่องกรอกตัวเลข
 import android.view.Gravity;                        // ตำแหน่งกลาง
+import android.view.MotionEvent;                    // นิ้วแตะ / ปล่อย (ปุ่มรูป)
 import android.view.View;                           // ชิ้นส่วนทุกชนิด
 import android.view.ViewGroup;                      // กล่องทุกชนิด
 import android.widget.FrameLayout;                  // กล่องวางตาม x y
@@ -52,6 +53,16 @@ public abstract class BaseClass extends AppCompatActivity {
     // สร้าง
     protected Txt txt(String s) { Txt t = new Txt(this); t.setText(s); t.setTextSize(18); return t; }   // ตัวหนังสือ ขนาด 18 (อยากได้ขนาดอื่น setTextSize ทับ)
     protected Btn btn(String s) { Btn t = new Btn(this); t.setText(s); return t; }
+    protected Img imgBtn(int id) {                          // ปุ่มรูป 1 รูป = 1 ปุ่ม (ขนาดเท่ารูป px) กดแล้วจางนิดนึง เช่น imgBtn(R.drawable.b_back)
+        Img i = img();
+        i.setImageResource(id);
+        i.setOnTouchListener((v, e) -> {
+            if (e.getAction() == MotionEvent.ACTION_DOWN) v.setAlpha(0.6f);
+            if (e.getAction() == MotionEvent.ACTION_UP || e.getAction() == MotionEvent.ACTION_CANCEL) v.setAlpha(1f);
+            return false;
+        });
+        return i;
+    }
     protected Inp numInp() { Inp t = new Inp(this); t.setInputType(InputType.TYPE_CLASS_NUMBER | InputType.TYPE_NUMBER_FLAG_DECIMAL); return t; }
     protected Img img() { return new Img(this); }
     protected Box box() { return new Box(this); }

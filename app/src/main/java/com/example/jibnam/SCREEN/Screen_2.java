@@ -11,7 +11,7 @@ public class Screen_2 extends BaseClass {
     // ===== ข้อมูล (ดึงจากไฟล์ตอนเปิดหน้า) =====
     double wtKg;                         // น้ำหนักตัว (กก.) จากบรรทัด U ล่าสุด
     double tgL;                          // เป้าน้ำที่ควรดื่ม (ลิตร) = WaterCalculate.targetL(wtKg)
-    static final String[] CUP_NAME = {"กรวย 115ml", "แก้ว 250ml", "ขวดเล็ก 600ml", "ขวดใหญ่ 1.5L"};   // ข้อความบนปุ่ม
+    static final int[] CUP_IMG = {R.drawable.b_cone, R.drawable.b_glass, R.drawable.b_bottle_s, R.drawable.b_bottle_l};   // รูปปุ่ม กรวย 115ml แก้ว 250ml ขวดเล็ก 600ml ขวดใหญ่ 1.5L
     static final int[] CUP_ML = {115, 250, 600, 1500};                                               // กดแล้วใส่ช่องกรอก (ml)
 
     Data data;                           // ไฟล์ RealData.txt (ข้อมูลจริงอยู่ในไฟล์ หน้าจอดึงมาโชว์อย่างเดียว)
@@ -30,7 +30,7 @@ public class Screen_2 extends BaseClass {
     Img btlImg;     // รูปขวด
     Inp amtIn;      // ช่องกรอกปริมาณ
     Box hisBox;     // กล่องประวัติ (วาดใหม่ทุกครั้งที่ refresh)
-    Btn notiBtn;    // ปุ่ม การแจ้งเตือน (เปิด)/(ปิด)
+    Img notiBtn;    // ปุ่มรูป แจ้งเตือน : เปิด / ปิด
 
     int testI = 0;                                    // ปุ่มทดสอบ: กดครั้งถัดไปจะโชว์ข้อความที่เท่าไหร่
 
@@ -44,69 +44,64 @@ public class Screen_2 extends BaseClass {
         tgL = WaterCalculate.targetL(wtKg);
 
         // ===== ปุ่มด้านบน 2 แถว แถวละ 2 ปุ่ม กว้างเท่ากัน =====
-        Btn toS1 = btn("แก้ไขข้อมูลส่วนตัว");
+        Img toS1 = imgBtn(R.drawable.b_profile);         // แก้ไขข้อมูลส่วนตัว
         onTap(toS1, () -> go(Screen_1.class));
-        put(pg, toS1, 30, 30, 500, WRAP);
-        Btn toS6 = btn("สรุปการดื่มน้ำ");
+        put(pg, toS1, 30, 30, WRAP, WRAP);
+        Img toS6 = imgBtn(R.drawable.b_summary);         // สรุปการดื่มน้ำ
         onTap(toS6, () -> go(Screen_6.class));
-        put(pg, toS6, 550, 30, 500, WRAP);
+        put(pg, toS6, 550, 30, WRAP, WRAP);
 
-        notiBtn = btn("");                       // กดสลับ เปิด/ปิด แล้วเซฟลงไฟล์
+        notiBtn = imgBtn(R.drawable.b_noti_on);                       // กดสลับ เปิด/ปิด แล้วเซฟลงไฟล์
         onTap(notiBtn, () -> {
             data.setNoti(!data.notiOn());
             showNoti();
         });
-        put(pg, notiBtn, 30, 160, 500, WRAP);
+        put(pg, notiBtn, 30, 175, WRAP, WRAP);
         showNoti();
-        Btn testBtn = btn("ทดสอบแจ้งเตือน");      // กด 1 ครั้ง = เด้ง 1 ข้อความ ไล่ครบแล้ววนใหม่
+        Img testBtn = imgBtn(R.drawable.b_test);      // กด 1 ครั้ง = เด้ง 1 ข้อความ ไล่ครบแล้ววนใหม่
         onTap(testBtn, () -> testNoti());
-        put(pg, testBtn, 550, 160, 500, WRAP);
+        put(pg, testBtn, 550, 175, WRAP, WRAP);
 
         // ===== ข้อมูล + รูปขวด อยู่กลางจอ =====
-        centerX(pg, txt("น้ำหนัก " + fmt(wtKg) + " กก.    ควรดื่ม " + WaterCalculate.L(tgL)), 0, 320, WRAP, WRAP);
+        centerX(pg, txt("น้ำหนัก " + fmt(wtKg) + " กก.    ควรดื่ม " + WaterCalculate.L(tgL)), 0, 335, WRAP, WRAP);
         drankTx = txt("");
         drankTx.setTextSize(20);
         bold(drankTx);
-        centerX(pg, drankTx, 0, 390, WRAP, WRAP);
+        centerX(pg, drankTx, 0, 405, WRAP, WRAP);
 
         btlImg = img();
-        centerX(pg, btlImg, 0, 470, 390, 540);
+        centerX(pg, btlImg, 0, 490, 390, 540);
         pctTx = txt("");
         bold(pctTx);
-        centerX(pg, pctTx, 0, 715, WRAP, WRAP);  // ทับกลางขวด
+        centerX(pg, pctTx, 0, 790, WRAP, WRAP);  // ทับกลางขวด
 
         plusTx = txt("");                        // "เพิ่มน้ำ : +115 ml สำเร็จ" ว่างตอนแรก
         bold(plusTx);
-        centerX(pg, plusTx, 0, 1030, WRAP, WRAP);
+        centerX(pg, plusTx, 0, 1045, WRAP, WRAP);
 
-        // ===== ปุ่มภาชนะ 2 แถว แถวละ 2 ปุ่ม =====
+        // ===== ปุ่มภาชนะ 4 ปุ่มแถวเดียว กว้าง 240 ห่างกัน 20 =====
         for (int i = 0; i < CUP_ML.length; i++) {
-            int x = 550;                           // ขวา
-            if (i % 2 == 0) x = 30;                // ซ้าย (ปุ่มที่ 0, 2)
-            int y = 1240;                          // แถวล่าง
-            if (i < 2) y = 1110;                   // แถวบน (ปุ่มที่ 0, 1)
-            cupBtn(pg, i, x, y);
+            cupBtn(pg, i, 30 + i * 260, 1120);
         }
 
         // ===== ช่องกรอก ml + submit แถวเดียวกัน =====
         amtIn = numInp();
-        put(pg, amtIn, 180, 1390, 360, WRAP);
-        put(pg, txt("ml"), 555, 1430, WRAP, WRAP);
-        Btn subBtn = btn("submit");
+        put(pg, amtIn, 150, 1415, 360, WRAP);
+        put(pg, txt("ml"), 525, 1455, WRAP, WRAP);
+        Img subBtn = imgBtn(R.drawable.b_save);         // บันทึก
         onTap(subBtn, () -> submit());
-        put(pg, subBtn, 700, 1390, 300, WRAP);
+        put(pg, subBtn, 650, 1400, WRAP, WRAP);
 
         // ===== ประวัติวันนี้ =====
         Txt hisTitle = txt("ประวัติ (วันนี้)");
         bold(hisTitle);
-        put(pg, hisTitle, 30, 1580, WRAP, WRAP);
-        Btn moreBtn = btn("Water History");
-        moreBtn.setAllCaps(false);               // ให้ขึ้นตามที่พิมพ์ ไม่เป็นตัวใหญ่หมด
+        put(pg, hisTitle, 30, 1610, WRAP, WRAP);
+        Img moreBtn = imgBtn(R.drawable.b_history);     // Water History
         onTap(moreBtn, () -> go(Screen_4.class));
-        put(pg, moreBtn, 630, 1545, 420, WRAP);
+        put(pg, moreBtn, 600, 1580, WRAP, WRAP);
 
         hisBox = box();                          // กล่องประวัติ (วาดใหม่ใน refresh)
-        put(pg, hisBox, 0, 1690, WRAP, WRAP);
+        put(pg, hisBox, 0, 1730, WRAP, WRAP);
 
         amtIn.setText("" + CUP_ML[0]);  // เริ่มต้นใส่ปริมาณภาชนะแรก
         refresh();
@@ -164,14 +159,16 @@ public class Screen_2 extends BaseClass {
     }
 
     void showNoti() {                    // ข้อความบนปุ่มแจ้งเตือน ดึงจากไฟล์
-        if (data.notiOn()) notiBtn.setText("การแจ้งเตือน (เปิด)");
-        else notiBtn.setText("การแจ้งเตือน (ปิด)");
+        if (data.notiOn()) {
+            setImg(notiBtn, R.drawable.b_noti_on);
+        } else {
+            setImg(notiBtn, R.drawable.b_noti_off);
+        }
     }
 
     void cupBtn(Box pg, int i, int x, int y) {   // ปุ่มภาชนะที่ i ที่ (x, y): กดแล้วเติมปริมาณ (ml) ในช่องกรอก
-        Btn b = btn(CUP_NAME[i]);
-        b.setAllCaps(false);                       // ml ไม่กลายเป็น ML
-        put(pg, b, x, y, 500, WRAP);
+        Img b = imgBtn(CUP_IMG[i]);
+        put(pg, b, x, y, WRAP, WRAP);
         onTap(b, () -> amtIn.setText("" + CUP_ML[i]));
     }
 
@@ -189,9 +186,9 @@ public class Screen_2 extends BaseClass {
         Box c = box();
         border(c);
         put(c, txt(s), 30, 42, WRAP, WRAP);                     // ข้อความซ้าย
-        Btn edBtn = btn("แก้ไข");
+        Img edBtn = imgBtn(R.drawable.b_edit);
         onTap(edBtn, () -> goWith(Screen_5.class, "serial", sn));   // ส่ง serial ไปหน้า 5
-        put(c, edBtn, 750, 3, 240, WRAP);                        // ปุ่มแก้ไขขวา
+        put(c, edBtn, 760, 20, WRAP, WRAP);                      // ปุ่มแก้ไขขวา
         put(hisBox, c, 30, row * 168, 1020, 150);
     }
 

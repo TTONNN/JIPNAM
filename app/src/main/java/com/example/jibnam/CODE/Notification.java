@@ -43,7 +43,7 @@ public class Notification extends BroadcastReceiver {
     static final String BACK = "อย่าลืมดื่มน้ำและบันทึกข้อมูลของคุณด้วยนะ";    // หายไปทั้งวัน
     static final int[] BACK_DAYS = {1, 3, 7, 14, 28};                    // หายไปวันที่เท่าไหร่ถึงเตือน
     static final double OVER_X = 1.5;                                    // ดื่มเกินเป้ากี่เท่า = มากเกินไป
-    static final double[] RATIO = {0.15, 0.275, 0.275, 0.15, 0.15};      // สัดส่วน 5 ช่วง (ต้องตรงกับ ratio ใน Screen_6)
+    static final double[] RATIO = {0.2, 0.2, 0.2, 0.2, 0.2};                // สัดส่วน 5 ช่วง (ต้องตรงกับ ratio ใน Screen_6)
 
     public static String[] allMsgs() {              // ข้อความทุกแบบ (ไว้ปุ่มทดสอบใน Screen_2 วนดู)
         return new String[]{
@@ -107,7 +107,7 @@ public class Notification extends BroadcastReceiver {
         b[0] = wake;
         double acc = 0;
         for (int i = 0; i < 5; i++) {
-            acc += RATIO[i];                                         // สัดส่วนสะสม 0.15, 0.425, 0.7, 0.85, 1.0
+            acc += RATIO[i];                                         // สัดส่วนสะสม 0.2, 0.4, 0.6, 0.8, 1.0
             b[i + 1] = wake + (int) Math.round(total * acc);
         }
         b[5] = sleep;

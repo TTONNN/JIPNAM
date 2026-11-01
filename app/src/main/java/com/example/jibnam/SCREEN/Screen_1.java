@@ -1,5 +1,6 @@
 package com.example.jibnam.SCREEN;
 
+import com.example.jibnam.R;
 import com.example.jibnam.CODE.*;
 import com.example.jibnam.DATA.*;
 
@@ -35,7 +36,7 @@ public class Screen_1 extends BaseClass {
         centerX(pg, weightInput, 0, 300, 360, WRAP);          // กว้าง 360 เหมือนช่องกรอกใน Screen_2
 
         // ปุ่มคำนวณ
-        Btn calculateButton = btn("คำนวณ");
+        Img calculateButton = imgBtn(R.drawable.b_calc);
         centerX(pg, calculateButton, 0, 450, WRAP, WRAP);
 
         onTap(calculateButton, () -> calculateTarget());
@@ -107,7 +108,7 @@ public class Screen_1 extends BaseClass {
         // ปุ่มเริ่มต้นใช้งาน
         // =========================
 
-        Btn submitButton = btn("เริ่มต้นใช้งาน");
+        Img submitButton = imgBtn(R.drawable.b_start);
         centerX(pg, submitButton, 0, 1550, WRAP, WRAP);
 
         onTap(submitButton, () -> submit());

@@ -1,6 +1,7 @@
 
 package com.example.jibnam.SCREEN;
 
+import com.example.jibnam.R;
 import com.example.jibnam.CODE.*;
 import com.example.jibnam.DATA.*;
 
@@ -47,7 +48,7 @@ public class Screen_5 extends BaseClass {
             Txt errorText = txt("ไม่พบประวัติที่ต้องการแก้ไข");
             centerX(pg, errorText, 0, 300, WRAP, WRAP);
 
-            Btn backButton = btn("กลับหน้าหลัก");
+            Img backButton = imgBtn(R.drawable.b_home);
             centerX(pg, backButton, 0, 500, WRAP, WRAP);
             onTap(backButton, () -> finish());          // ปิดหน้านี้ กลับ Screen_2 หน้าเดิม
 
@@ -115,13 +116,13 @@ public class Screen_5 extends BaseClass {
         setTxt(minuteInput, oldDrink[4]);
 
         // ปุ่มลบประวัติ
-        Btn deleteButton = btn("ลบประวัติ");
-        put(pg, deleteButton, 200, 1200, WRAP, WRAP);
+        Img deleteButton = imgBtn(R.drawable.b_delete);
+        put(pg, deleteButton, 120, 1200, WRAP, WRAP);
         onTap(deleteButton,() ->deleteHistory());
 
         // ปุ่ม Submit
-        Btn submitButton = btn("Submit");
-        put(pg, submitButton, 600, 1200, WRAP, WRAP);
+        Img submitButton = imgBtn(R.drawable.b_ok);
+        put(pg, submitButton, 560, 1200, WRAP, WRAP);
         onTap(submitButton,() -> submit());
     }
 

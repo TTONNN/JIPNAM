@@ -1,5 +1,6 @@
 package com.example.jibnam.SCREEN;
 
+import com.example.jibnam.R;
 import com.example.jibnam.CODE.*;
 import com.example.jibnam.DATA.*;
 
@@ -40,9 +41,9 @@ public class Screen_4 extends BaseClass {
         bold(head);
         centerX(pg, head, 0, 40, WRAP, WRAP);
 
-        Btn Back = btn("<< Back");
+        Img Back = imgBtn(R.drawable.b_back);
         onTap(Back, () -> finish());                      // ปิดหน้านี้ กลับ Screen_2 หน้าเดิม
-        put(pg, Back, 30, 170, 280, 110);
+        put(pg, Back, 30, 170, WRAP, WRAP);
 
         cal = new CalendarMonth(month, year); // แสดงที่ปัจจุบันเสมอ
         data = new Data(DataApi.realDataFile(this)); //อ่านไฟล์
@@ -53,10 +54,10 @@ public class Screen_4 extends BaseClass {
         title.setTextAlignment(Txt.TEXT_ALIGNMENT_CENTER);
         put(pg, title, 160, 330, 760, 110);
 
-        Btn prev = btn("<");
-        Btn next = btn(">");
-        put(pg, prev, 30, 330, 120, 110);
-        put(pg, next, 930, 330, 120, 110);
+        Img prev = imgBtn(R.drawable.b_prev);             // ปุ่มรูปลูกศร
+        Img next = imgBtn(R.drawable.b_next);
+        put(pg, prev, 30, 325, WRAP, WRAP);
+        put(pg, next, 930, 325, WRAP, WRAP);
 
         onTap(prev, () -> {
             cal.previousMonth();
