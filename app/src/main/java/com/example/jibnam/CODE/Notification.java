@@ -18,15 +18,14 @@ import java.util.List;
 /*
  * Notification : เตือนดื่มน้ำ
  *   เอาเวลาตื่น - นอน (บรรทัดล่างสุด) แบ่ง 5 ช่วง ตามสัดส่วน RATIO (เหมือน Screen_6)
- *   ทุกครั้งที่ขึ้นช่วงใหม่ (ตอนตื่น + จบแต่ละช่วง) ระบบจะปลุก onReceive → check() → เด้งแจ้งเตือน → ตั้งปลุกรอบถัดไป
+ *   ทุกครั้งที่จบ 1 ช่วง ระบบจะปลุก onReceive → check() → เด้งแจ้งเตือน (ถ้ามี) → ตั้งปลุกรอบถัดไป
  *
  *   check() คิดแบบนี้ (เรียงตามลำดับ)
  *     1. แจ้งเตือนปิดอยู่ / ยังไม่มีผู้ใช้                 → ไม่เตือน
  *     2. หายไปเต็มวัน (ไม่ได้บันทึกอะไรเลย) เป็นวันที่ 1 3 7 14 28  → BACK (วันละครั้ง ตอนจบช่วง 1)
- *     3. ตอนตื่น (เริ่มช่วง 1)                           → NEW ช่วงที่ 1
- *     4. วันนี้ดื่มเกิน เป้า × OVER_X                     → OVER
- *     5. นับช่วงที่ไม่ได้ดื่มติดกัน ย้อนจากช่วงที่เพิ่งจบ   → STACK[จำนวนช่วง]
- *     6. ช่วงที่เพิ่งจบดื่มแล้ว                          → NEW ช่วงถัดไป / DONE (ถึงเวลานอน)
+ *     3. วันนี้ดื่มเกิน เป้า × OVER_X                     → OVER
+ *     4. นับช่วงที่ไม่ได้ดื่มติดกัน ย้อนจากช่วงที่เพิ่งจบ   → STACK[จำนวนช่วง]
+ *     5. ช่วงที่เพิ่งจบดื่มแล้ว                          → ไม่เตือน
  *
  * เรียกใช้ : Notification.start(this);   ← ใส่ใน Screen_2 แล้ว (ขอสิทธิ์ + ตั้งปลุกรอบแรก)
  */
@@ -43,23 +42,19 @@ public class Notification extends BroadcastReceiver {
     };
     static final String OVER = "คุณดื่มน้ำมากเกินไปแล้ว ควรค่อยๆดื่มนะ";      // ดื่มเกิน
     static final String BACK = "อย่าลืมดื่มน้ำและบันทึกข้อมูลของคุณด้วยนะ";    // หายไปทั้งวัน
-    static final String NEW = "เข้าช่วงที่ %d แล้ว ช่วงนี้ควรดื่มน้ำประมาณ %d ml";   // ขึ้นช่วงใหม่ (%d = เลขช่วง, ml)
-    static final String DONE = "ครบทุกช่วงของวันนี้แล้ว เก่งมาก พักผ่อนนะ";       // ถึงเวลานอน + ช่วงสุดท้ายดื่มแล้ว
     static final int[] BACK_DAYS = {1, 3, 7, 14, 28};                    // หายไปวันที่เท่าไหร่ถึงเตือน
     static final double OVER_X = 1.5;                                    // ดื่มเกินเป้ากี่เท่า = มากเกินไป
     static final double[] RATIO = {0.2, 0.2, 0.2, 0.2, 0.2};                // สัดส่วน 5 ช่วง (ต้องตรงกับ ratio ใน Screen_6)
 
-    public static String[] allMsgs() {              // ข้อความทุกแบบ (ไว้ปุ่มทดสอบใน Screen_2 วนดู)
+    public static String[] allMsgs() {              // ข้อความทุกแบบ 7 ข้อ (ไว้ปุ่มทดสอบใน Screen_2 วนดู)
         return new String[]{
-                "[ขาด 1 ช่วง] " + STACK[1],
-                "[ขาด 2 ช่วง] " + STACK[2],
-                "[ขาด 3 ช่วง] " + STACK[3],
-                "[ขาด 4 ช่วง] " + STACK[4],
-                "[ขาด 5 ช่วง] " + STACK[5],
-                "[ดื่มเกิน] " + OVER,
-                "[หายไป 1 3 7 14 28 วัน] " + BACK,
-                "[ขึ้นช่วงใหม่] " + String.format(NEW, 2, 422),
-                "[ถึงเวลานอน] " + DONE,
+                STACK[1],                           // code 1 ขาด 1 ช่วง
+                STACK[2],                           // code 2 ขาด 2 ช่วง
+                STACK[3],                           // code 3 ขาด 3 ช่วง
+                STACK[4],                           // code 4 ขาด 4 ช่วง
+                STACK[5],                           // code 5 ขาด 5 ช่วง
+                OVER,                               // code 6 ดื่มเกิน
+                BACK,                               // code 7 หายไป 1 3 7 14 28 วัน
         };
     }
 
@@ -86,7 +81,6 @@ public class Notification extends BroadcastReceiver {
         int k = 0;                                                   // จบไปแล้วกี่ช่วง (0..5)
         for (int j = 1; j <= 5; j++) if (now >= b[j]) k = j;
         double tg = WaterCalculate.targetL(Double.parseDouble(u[1]));
-        int slotMl = (int) Math.round(tg * 1000 * RATIO[0]);         // ควรดื่มช่วงละกี่ ml
 
         int away = awayDays(data, today);                            // 2. หายไปกี่วันเต็ม
         if (away >= 1) {
@@ -94,17 +88,16 @@ public class Notification extends BroadcastReceiver {
             for (int i = 0; i < BACK_DAYS.length; i++) if (BACK_DAYS[i] == away) return BACK;
             return null;
         }
-        if (k == 0) return String.format(NEW, 1, slotMl);            // 3. เพิ่งตื่น = เริ่มช่วง 1
-        if (data.sumLiters(today) > tg * OVER_X) return OVER;        // 4. ดื่มเกิน
+        if (k == 0) return null;                                     //    ยังไม่จบช่วงไหนเลย
+        if (data.sumLiters(today) > tg * OVER_X) return OVER;        // 3. ดื่มเกิน
 
-        int miss = 0;                                                // 5. ขาดติดกันกี่ช่วง
+        int miss = 0;                                                // 4. ขาดติดกันกี่ช่วง
         for (int j = k; j >= 1; j--) {
             if (data.drankBetween(today, b[j - 1], b[j]) > 0) break; //    เจอช่วงที่ดื่ม = หยุดนับ
             miss++;
         }
         if (miss > 0) return STACK[miss];
-        if (k == 5) return DONE;                                     // 6. ถึงเวลานอน ช่วงสุดท้ายดื่มแล้ว
-        return String.format(NEW, k + 1, slotMl);                    //    ช่วงล่าสุดดื่มแล้ว = บอกว่าขึ้นช่วงใหม่
+        return null;                                                 // 5. ช่วงที่เพิ่งจบดื่มแล้ว = ไม่เตือน
     }
 
     public static int[] slots(String[] u) {         // { ตื่น, จบช่วง1, จบช่วง2, จบช่วง3, จบช่วง4, นอน } หน่วยนาทีของวัน
@@ -142,13 +135,13 @@ public class Notification extends BroadcastReceiver {
     }
 
     // ===== ตั้งปลุก / เด้งแจ้งเตือน =====
-    static void next(Context c) {                   // ตั้งปลุกตอนขึ้นช่วงถัดไป (ตื่น + จบแต่ละช่วง วันนี้ไม่เหลือ = ตอนตื่นพรุ่งนี้)
+    static void next(Context c) {                   // ตั้งปลุกตอนจบช่วงถัดไป (วันนี้ไม่เหลือ = จบช่วง 1 พรุ่งนี้)
         String[] u = new Data(DataApi.realDataFile(c)).lastUser();
         if (u == null) return;
         int[] b = slots(u);
         long t = 0;
         for (int day = 0; day <= 1 && t == 0; day++) {
-            for (int j = 0; j <= 5; j++) {
+            for (int j = 1; j <= 5; j++) {
                 Calendar cal = Calendar.getInstance();
                 cal.set(Calendar.HOUR_OF_DAY, 0);
                 cal.set(Calendar.MINUTE, 0);

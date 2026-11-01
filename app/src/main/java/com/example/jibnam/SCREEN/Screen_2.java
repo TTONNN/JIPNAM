@@ -164,7 +164,7 @@ public class Screen_2 extends BaseClass {
 
     void testNoti() {                    // กดปุ่มทดสอบ: เด้งข้อความที่ testI แล้วเลื่อนไปข้อความถัดไป (ครบแล้วกลับไปแบบแรก)
         String[] all = Notification.allMsgs();
-        Notification.show(this, "ทดสอบ " + (testI + 1) + "/" + all.length + " " + all[testI]);
+        Notification.show(this, all[testI] + " code[" + (testI + 1) + "/" + all.length + "]");   // เช่น ... code[2/7]
         testI++;
         if (testI >= all.length) testI = 0;
     }
