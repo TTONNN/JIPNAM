@@ -45,13 +45,13 @@ public class Screen_6 extends BaseClass {
 
         String[] user = data.lastUser();
 
-        double weight = Double.parseDouble(user[2]);
+        double weight = Double.parseDouble(user[1]);
 
-        wakeMin = Integer.parseInt(user[3]) * 60
-                + Integer.parseInt(user[4]);
+        wakeMin = Integer.parseInt(user[2]) * 60
+                + Integer.parseInt(user[3]);
 
-        sleepMin = Integer.parseInt(user[5]) * 60
-                + Integer.parseInt(user[6]);
+        sleepMin = Integer.parseInt(user[4]) * 60
+                + Integer.parseInt(user[5]);
 
         targetL = WaterCalculate.targetL(weight);
 
@@ -223,7 +223,7 @@ public class Screen_6 extends BaseClass {
     // อ่านวันของรอบจากเวลาที่แสดงในประวัติ
     Calendar getDrinkCycle(String[] d) throws Exception {
 
-        Date date = dateFormat.parse(d[1]);
+        Date date = dateFormat.parse(d[0]);
 
         if (date == null) {
             return null;
@@ -232,8 +232,8 @@ public class Screen_6 extends BaseClass {
         Calendar drinkTime = Calendar.getInstance();
         drinkTime.setTime(date);
 
-        int hour = Integer.parseInt(d[3]);
-        int minute = Integer.parseInt(d[4]);
+        int hour = Integer.parseInt(d[7]);
+        int minute = Integer.parseInt(d[8]);
 
         drinkTime.set(Calendar.HOUR_OF_DAY, hour);
         drinkTime.set(Calendar.MINUTE, minute);
@@ -353,11 +353,11 @@ public class Screen_6 extends BaseClass {
             }
         }
 
-        showTxt(pg, most, 18, 10, y, 340, 60);
-        showTxt(pg, least, 18, 10, y + 62, 340, 60);
-        showTxt(pg, missed, 18, 10, y + 124, 340, 60);
+        showTxt(pg, most, 18, 10, y, 340, 40);              // สูง 40 ห่าง 42 (เดิม 60/62 ห่างเกิน)
+        showTxt(pg, least, 18, 10, y + 42, 340, 40);
+        showTxt(pg, missed, 18, 10, y + 84, 340, 40);
 
-        return y + 190;
+        return y + 130;
     }
 
     // แปลงขนาดและวางตำแหน่ง
@@ -446,8 +446,8 @@ public class Screen_6 extends BaseClass {
                     continue;
                 }
 
-                int hour = Integer.parseInt(d[3]);
-                int minute = Integer.parseInt(d[4]);
+                int hour = Integer.parseInt(d[7]);
+                int minute = Integer.parseInt(d[8]);
 
                 int drinkMinute = hour * 60 + minute;
                 int elapsed = drinkMinute - wakeMin;
@@ -463,7 +463,7 @@ public class Screen_6 extends BaseClass {
                     if (elapsed >= start[i] - wakeMin
                             && elapsed < end[i] - wakeMin) {
 
-                        drank[i] += Double.parseDouble(d[2]);
+                        drank[i] += Double.parseDouble(d[6]);
                         break;
                     }
                 }

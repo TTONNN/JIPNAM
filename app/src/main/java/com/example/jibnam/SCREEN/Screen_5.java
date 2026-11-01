@@ -62,13 +62,13 @@ public class Screen_5 extends BaseClass {
         put(pg, oldTitle, 20, 300, WRAP, WRAP);
 
         // ปริมาณน้ำเดิม
-        double oldLiter = Double.parseDouble(oldDrink[2]);
+        double oldLiter = Double.parseDouble(oldDrink[6]);
         Txt oldAmountText = txt("ปริมาณน้ำ: " + WaterCalculate.ml(oldLiter));
         oldAmountText.setTextSize(20);
         put(pg, oldAmountText, 20, 400, WRAP, WRAP);
 
         // เวลาเดิม
-        Txt oldTimeText = txt("เวลา: " + formatTime(oldDrink[3], oldDrink[4]));
+        Txt oldTimeText = txt("เวลา: " + formatTime(oldDrink[7], oldDrink[8]));
         oldTimeText.setTextSize(20);
         put(pg, oldTimeText, 20, 500, WRAP, WRAP);
 
@@ -112,8 +112,8 @@ public class Screen_5 extends BaseClass {
         bold(msgTxt);
         centerX(pg, msgTxt, 0, 1400, WRAP, WRAP);
 
-        setTxt(hourInput, oldDrink[3]);
-        setTxt(minuteInput, oldDrink[4]);
+        setTxt(hourInput, oldDrink[7]);
+        setTxt(minuteInput, oldDrink[8]);
 
         // ปุ่มลบประวัติ
         Img deleteButton = imgBtn(R.drawable.b_delete);

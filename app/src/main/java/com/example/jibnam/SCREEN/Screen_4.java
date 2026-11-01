@@ -94,7 +94,51 @@ public class Screen_4 extends BaseClass {
         detail.setTextAlignment(Txt.TEXT_ALIGNMENT_CENTER);
         put(pg, detail, 30, ly + 720, 1020, 280);
 
+        // ===== ล่างสุดชิดซ้าย: ปุ่มดาวน์โหลด + กล่องวิธีอ่านไฟล์ =====
+        Img dlBtn = imgBtn(R.drawable.b_download);
+        onTap(dlBtn, () -> DataApi.download(this));       // copy RealData.txt ไปที่ Download (DATA/DataApi)
+        put(pg, dlBtn, 30, ly + 1030, WRAP, WRAP);
+
+        Col how = col();                                  // กล่องวิธีอ่านไฟล์ ตัวเล็ก 16
+        border(how, 0xFFF4F9FF);                          // กรอบ พื้นฟ้าอ่อนมาก
+        how.setPadding(36, 24, 36, 24);
+        Txt hTitle = txt("📄 วิธีอ่านไฟล์ RealData.txt");
+        hTitle.setTextSize(16);
+        bold(hTitle);
+        add(how, hTitle, WRAP, WRAP);
+        String[] lines = {                                // 1 ข้อความ = 1 บรรทัดใหม่เสมอ (Col เรียงลง)
+                "[ บรรทัด = บันทึก 1 ครั้ง ข้อมูลคั่นด้วย ; ]",
+                "1. เวลาบันทึก (ปี เดือน วัน ชั่วโมง นาที วินาที)",
+                "2. น้ำหนัก (กิโลกรัม)",
+                "3. เวลาตื่น (ชั่วโมง ; นาที)",
+                "4. เวลานอน (ชั่วโมง ; นาที)",
+                "5. ปริมาณที่ดื่ม (ลิตร) ถ้าเป็น 0 = บันทึกข้อมูลส่วนตัว",
+                "6. เวลาที่ดื่ม (ชั่วโมง ; นาที)",
+                "7. เป้าที่ควรดื่มวันนั้น (ลิตร)",
+                "8. ดื่มรวมวันนั้น (ลิตร)",
+                "9. แจ้งเตือน (on = เปิด, off = ปิด)",
+                "บรรทัดว่าง = รายการที่ลบไปแล้ว"
+        };
+        for (int i = 0; i < lines.length; i++) {
+            Txt t = txt(lines[i]);
+            t.setTextSize(16);
+            add(how, t, WRAP, WRAP);
+        }
+        put(pg, how, 30, ly + 1190, 1020, WRAP);
+
         updateCalendar();
+    }
+
+    boolean isOutside(String[] d) {                      // แก้วนี้ดื่มนอกเวลาตื่น-นอนไหม (ใช้เวลาตื่น/นอนที่เก็บไว้ในบรรทัดนั้น)
+        int t = toMin(d[7], d[8]);                       // เวลาที่ดื่ม  (ช่อง 8-9)
+        int wake = toMin(d[2], d[3]);                    // เวลาตื่น   (ช่อง 3-4)
+        int sleep = toMin(d[4], d[5]);                   // เวลานอน   (ช่อง 5-6)
+        if (wake < sleep) return t < wake || t >= sleep; // ปกติ เช่น ตื่น 7:00 นอน 23:00
+        return t >= sleep && t < wake;                   // นอนหลังเที่ยงคืน เช่น ตื่น 7:00 นอน 1:00
+    }
+
+    int toMin(String h, String m) {                      // "7","30" → 450 นาที
+        return Integer.parseInt(h) * 60 + Integer.parseInt(m);
     }
 
     void legend(Box pg, int y, String text) {             // คำอธิบายสี 1 แถว: อีโมจิสี + ข้อความ
@@ -150,11 +194,11 @@ public class Screen_4 extends BaseClass {
             List<String[]> drinks = data.getDrinks(dayFormatted);
             double targetLiters = 2.0; // ค่าเริ่มต้นสำรอง (ยังไม่มีผู้ใช้)
             if (!drinks.isEmpty()) {
-                targetLiters = Double.parseDouble(drinks.get(0)[5]);        // เป้าที่เก็บไว้ในวันนั้น
+                targetLiters = Double.parseDouble(drinks.get(0)[9]);        // เป้าที่เก็บไว้ในวันนั้น
             } else {
                 String[] userInfo = data.lastUser();
                 if (userInfo != null) {
-                    targetLiters = WaterCalculate.targetL(Double.parseDouble(userInfo[2]));   // คิดจากน้ำหนักล่าสุด
+                    targetLiters = WaterCalculate.targetL(Double.parseDouble(userInfo[1]));   // คิดจากน้ำหนักล่าสุด
                 }
             }
 
@@ -220,9 +264,13 @@ public class Screen_4 extends BaseClass {
                         + "\nไม่มีประวัติการดื่มน้ำ");
             } else {
                 int pct = (int) Math.round((totalDrank / targetLiters) * 100);
+                int outside = 0;                                    // ดื่มนอกช่วงเวลาตื่น-นอน กี่ครั้ง
+                for (int i = 0; i < selDrinks.size(); i++) {
+                    if (isOutside(selDrinks.get(i))) outside++;
+                }
                 setTxt(detail, "วันที่ " + selectDay + " " + monthName
                         + "\nดื่มน้ำรวม " + WaterCalculate.L(totalDrank) + " / " + WaterCalculate.L(targetLiters) + " (" + pct + "%)"
-                        + "\nดื่มน้ำ " + selDrinks.size() + " ครั้ง");
+                        + "\nดื่มน้ำ " + selDrinks.size() + " ครั้ง ในช่วง " + (selDrinks.size() - outside) + " ครั้ง และนอกช่วง " + outside + " ครั้ง");
             }
         });
     }

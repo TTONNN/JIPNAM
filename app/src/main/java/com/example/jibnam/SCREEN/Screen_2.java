@@ -9,10 +9,10 @@ import java.util.*;                     // List, Locale
 public class Screen_2 extends BaseClass {
 
     // ===== ข้อมูล (ดึงจากไฟล์ตอนเปิดหน้า) =====
-    double wtKg;                         // น้ำหนักตัว (กก.) จากบรรทัด U ล่าสุด
+    double wtKg;                         // น้ำหนักตัว (กก.) จากบรรทัดล่างสุด
     double tgL;                          // เป้าน้ำที่ควรดื่ม (ลิตร) = WaterCalculate.targetL(wtKg)
-    static final int[] CUP_IMG = {R.drawable.b_cone, R.drawable.b_glass, R.drawable.b_bottle_s, R.drawable.b_bottle_l};   // รูปปุ่ม กรวย 115ml แก้ว 250ml ขวดเล็ก 600ml ขวดใหญ่ 1.5L
-    static final int[] CUP_ML = {115, 250, 600, 1500};                                               // กดแล้วใส่ช่องกรอก (ml)
+    static final int[] CUP_IMG = {R.drawable.b_cone, R.drawable.b_glass, R.drawable.b_bottle_s};   // รูปปุ่ม กรวย 115ml แก้ว 250ml ขวดเล็ก 600ml
+    static final int[] CUP_ML = {115, 250, 600};                                                     // กดแล้วใส่ช่องกรอก (ml)
 
     Data data;                           // ไฟล์ RealData.txt (ข้อมูลจริงอยู่ในไฟล์ หน้าจอดึงมาโชว์อย่างเดียว)
     double drkL;                         // ดื่มแล้ววันนี้ (ลิตร) รวมจากไฟล์ทุกครั้งที่ refresh
@@ -28,6 +28,8 @@ public class Screen_2 extends BaseClass {
     Txt drankTx;    // "ดื่มแล้ว 1.46 L / 2.10 L"
     Txt pctTx;      // % บนรูปขวด
     Img btlImg;     // รูปขวด
+    Img streakImg;  // หยดน้ำ Streak (รูปเปลี่ยนตามวันต่อเนื่อง) กดแล้วไป Screen_3
+    Txt streakTx;   // จำนวนวันต่อเนื่อง "3💧" ใต้รูป
     Inp amtIn;      // ช่องกรอกปริมาณ
     Box hisBox;     // กล่องประวัติ (วาดใหม่ทุกครั้งที่ refresh)
     Img notiBtn;    // ปุ่มรูป แจ้งเตือน : เปิด / ปิด
@@ -40,7 +42,7 @@ public class Screen_2 extends BaseClass {
         data = new Data(DataApi.realDataFile(this));
         if (data.lastUser() == null)                                   // ชั่วคราว: ยังไม่มีข้อมูลผู้ใช้ ใส่ค่าตัวอย่างไว้ก่อน
             data.saveUser(60, 7, 0, 23, 0);                            //   (ลบได้เมื่อ Screen_1 เซฟข้อมูลผู้ใช้จริง)
-        wtKg = Double.parseDouble(data.lastUser()[2]);
+        wtKg = Double.parseDouble(data.lastUser()[1]);
         tgL = WaterCalculate.targetL(wtKg);
 
         // ===== ปุ่มด้านบน 2 แถว แถวละ 2 ปุ่ม กว้างเท่ากัน =====
@@ -75,13 +77,23 @@ public class Screen_2 extends BaseClass {
         bold(pctTx);
         centerX(pg, pctTx, 0, 790, WRAP, WRAP);  // ทับกลางขวด
 
+        streakImg = imgBtn(R.drawable.ch_cry);           // หยดน้ำ Streak ขวาของขวด กดแล้วไป Screen_3
+        onTap(streakImg, () -> go(Screen_3.class));
+        put(pg, streakImg, 810, 560, 230, 230);
+        streakTx = txt("");                              // "3💧" ใต้รูป
+        streakTx.setTextSize(24);
+        bold(streakTx);
+        streakTx.setGravity(1);                          // 1 = ตรงกลางแนวนอน
+        onTap(streakTx, () -> go(Screen_3.class));
+        put(pg, streakTx, 810, 800, 230, WRAP);
+
         plusTx = txt("");                        // "เพิ่มน้ำ : +115 ml สำเร็จ" ว่างตอนแรก
         bold(plusTx);
         centerX(pg, plusTx, 0, 1045, WRAP, WRAP);
 
-        // ===== ปุ่มภาชนะ 4 ปุ่มแถวเดียว กว้าง 240 ห่างกัน 20 =====
+        // ===== ปุ่มภาชนะ 3 ปุ่มแถวเดียว กว้าง 240 ห่างกัน 60 อยู่กลางจอ =====
         for (int i = 0; i < CUP_ML.length; i++) {
-            cupBtn(pg, i, 30 + i * 260, 1120);
+            cupBtn(pg, i, 120 + i * 300, 1120);
         }
 
         // ===== ช่องกรอก ml + submit แถวเดียวกัน =====
@@ -126,20 +138,23 @@ public class Screen_2 extends BaseClass {
     }
 
     void refresh() {                     // ดึงแก้ววันนี้จากไฟล์ แล้ววาดประวัติ ยอดดื่ม รูปขวด %
-        List<String[]> ds = data.getDrinks(Data.today());          // d = { "D", serial, ลิตร, ชม., นาที, ต้องดื่ม, ดื่มแล้วทั้งวัน, แจ้งเตือน }
+        List<String[]> ds = data.getDrinks(Data.today());          // d = { เวลาบันทึก, น้ำหนัก, ตื่น ชม., นาที, นอน ชม., นาที, ลิตร, ชม., นาที, เป้า, รวมวันนั้น, แจ้งเตือน }
         clr(hisBox);
         drkL = 0;
         int row = 0;                                               // แถวที่ 0 อยู่บนสุด
         for (int k = ds.size() - 1; k >= 0; k--) {                 // ท้ายไฟล์ = แก้วล่าสุด อยู่บนสุด
             String[] d = ds.get(k);
-            double l = Double.parseDouble(d[2]);
+            double l = Double.parseDouble(d[6]);
             drkL += l;
-            hisCard(row, d[1], WaterCalculate.ml(l) + "   เวลา " + hm(d[3], d[4]));
+            hisCard(row, d[0], WaterCalculate.ml(l) + "   เวลา " + hm(d[7], d[8]));
             row++;
         }
         drankTx.setText("ดื่มแล้ว " + WaterCalculate.L(drkL) + " / " + WaterCalculate.L(tgL));
         btlImg.setImageResource(BTL[pct() / 10]);  // รูปเปลี่ยนทีละ 10%
         pctTx.setText(pctTxt());          // % ทศนิยม 2 ตำแหน่ง
+        Screen_3.calc(data);              // วันต่อเนื่อง (ระบบ streak อยู่ใน Screen_3)
+        setImg(streakImg, Screen_3.pic);
+        setTxt(streakTx, Screen_3.days + "💧");
     }
 
     void testNoti() {                    // กดปุ่มทดสอบ: เด้งข้อความที่ testI แล้วเลื่อนไปข้อความถัดไป (ครบแล้วกลับไปแบบแรก)
@@ -177,7 +192,7 @@ public class Screen_2 extends BaseClass {
      * Screen_5 รับแล้วใช้ต่อ:
      *   Data data = new Data(DataApi.realDataFile(this));
      *   String sn = arg("serial");                     // แก้วที่ถูกกดแก้ไข
-     *   String[] d = data.getDrink(sn);                // d[2]=ลิตร  d[3]=ชม.  d[4]=นาที
+     *   String[] d = data.getDrink(sn);                // d[6]=ลิตร  d[7]=ชม.  d[8]=นาที
      *   data.editDrink(sn, ลิตร, ชม., นาที);           // แก้ = เขียนทับค่าในบรรทัดเดิม
      *   data.deleteDrink(sn);                          // ลบ = เขียนทับบรรทัดนั้นด้วยบรรทัดว่าง
      *   go(Screen_2.class);                            // กลับมา Screen_2 จะดึงจากไฟล์ใหม่เอง
