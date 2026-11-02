@@ -177,7 +177,7 @@ public class Screen_6 extends BaseClass {
 
         // ปุ่มกลับ
         Img back = imgBtn(R.drawable.b_back);
-        centerX(pg, back, 0, u(y + 15), WRAP, WRAP);
+        centerX(pg, back, 0, u(y + 15), 280, 120);
         onTap(back, () -> finish());
     }
 
@@ -367,11 +367,7 @@ public class Screen_6 extends BaseClass {
     }
 
     void placeTxt(Box p, Txt v, int x, int y, int w, int h) {
-        int height = WRAP;
-        if (h != WRAP) {
-            height = u(h);
-        }
-        centerX(p, v, u(x), u(y), u(w), height);
+        centerX(p, v, u(x), u(y), u(w), u(h));
     }
 
     // คำนวณเวลา 5 ช่วง

@@ -22,9 +22,9 @@ import androidx.appcompat.widget.AppCompatEditText; // ช่องกรอก
 import androidx.appcompat.widget.AppCompatImageView;// รูป
 import androidx.appcompat.widget.AppCompatTextView; // ตัวหนังสือ
 
-// คลาสแม่ของทุกหน้า  หน่วยทุกอย่างเป็น px  WRAP = พอดีของข้างใน
+// คลาสแม่ของทุกหน้า  หน่วยทุกอย่างเป็น px (ขนาดทุกชิ้นใส่เป็นเลข px จริง)
 public abstract class BaseClass extends AppCompatActivity {
-
+//AppCompatActivity // onCreate() เปิดหน้า //onResume() รีฟีดกลับหน้าหลัก //setContentView() ทำให้เห็น(ออปเจอคนั้น)
     public static class Box extends FrameLayout { public Box(Context c) { super(c); } }              // กล่อง x y
     public static class Col extends LinearLayout { public Col(Context c) { super(c); setOrientation(VERTICAL); } }   // เรียงลง
     public static class Row extends LinearLayout { public Row(Context c) { super(c); } }            // เรียงขวา
@@ -34,7 +34,6 @@ public abstract class BaseClass extends AppCompatActivity {
     public static class Inp extends AppCompatEditText { public Inp(Context c) { super(c); } }       // ช่องกรอก
     public static class Img extends AppCompatImageView { public Img(Context c) { super(c); } }      // รูป
 
-    public static final int WRAP = -2;   // พอดีของข้างใน
     Box pg;                              // กล่องทั้งหน้า
 
     protected abstract void build(Box pg);   // หน้าลูกเขียนตรงนี้
@@ -100,6 +99,11 @@ public abstract class BaseClass extends AppCompatActivity {
         lp.width = w;
         lp.height = h;
         p.addView(v, lp);
+    }
+    protected void size(View v, int w, int h) {                               // เปลี่ยนขนาดของที่วางไปแล้ว (px) เช่น กล่องประวัติสูงตามจำนวนแถว
+        v.getLayoutParams().width = w;
+        v.getLayoutParams().height = h;
+        v.requestLayout();
     }
     protected void clr(ViewGroup p) { p.removeAllViews(); }                   // ล้างกล่อง
     protected void border(View v) { border(v, Color.WHITE); }                 // กรอบดำ พื้นขาว

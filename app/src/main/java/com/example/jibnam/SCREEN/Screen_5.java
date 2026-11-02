@@ -35,21 +35,24 @@ public class Screen_5 extends BaseClass {
         Txt title = txt("JIBNAM");
         title.setTextSize(48);
         bold(title);
-        centerX(pg, title, 0,0 , WRAP, WRAP);
+        title.setGravity(1);                               // 1 = ตรงกลางแนวนอน
+        centerX(pg, title, 0, 0, 1000, 200);
 
         // หัวข้อ
         Txt subtitle = txt("แก้ไขประวัติ");
         subtitle.setTextSize(24);
         bold(subtitle);
-        centerX(pg, subtitle, 0, 180, WRAP, WRAP);
+        subtitle.setGravity(1);
+        centerX(pg, subtitle, 0, 180, 1000, 100);
 
         // ตรวจสอบว่ามีข้อมูลแก้วหรือไม่
         if (oldDrink == null) {
             Txt errorText = txt("ไม่พบประวัติที่ต้องการแก้ไข");
-            centerX(pg, errorText, 0, 300, WRAP, WRAP);
+            errorText.setGravity(1);
+            centerX(pg, errorText, 0, 300, 1000, 80);
 
             Img backButton = imgBtn(R.drawable.b_home);
-            centerX(pg, backButton, 0, 500, WRAP, WRAP);
+            centerX(pg, backButton, 0, 500, 420, 130);
             onTap(backButton, () -> finish());          // ปิดหน้านี้ กลับ Screen_2 หน้าเดิม
 
             return;
@@ -59,70 +62,73 @@ public class Screen_5 extends BaseClass {
         Txt oldTitle = txt("ข้อมูลก่อนแก้ไข");
         oldTitle.setTextSize(22);
         bold(oldTitle);
-        put(pg, oldTitle, 20, 300, WRAP, WRAP);
+        put(pg, oldTitle, 20, 300, 1000, 90);
 
         // ปริมาณน้ำเดิม
         double oldLiter = Double.parseDouble(oldDrink[6]);
         Txt oldAmountText = txt("ปริมาณน้ำ: " + WaterCalculate.ml(oldLiter));
         oldAmountText.setTextSize(20);
-        put(pg, oldAmountText, 20, 400, WRAP, WRAP);
+        put(pg, oldAmountText, 20, 400, 1000, 90);
 
         // เวลาเดิม
         Txt oldTimeText = txt("เวลา: " + formatTime(oldDrink[7], oldDrink[8]));
         oldTimeText.setTextSize(20);
-        put(pg, oldTimeText, 20, 500, WRAP, WRAP);
+        put(pg, oldTimeText, 20, 500, 1000, 90);
 
         // ปริมาณน้ำใหม่
         Txt amountLabel = txt("ปริมาณน้ำ (ml)");
         amountLabel.setTextSize(20);
         bold(amountLabel);
-        centerX(pg, amountLabel, 0, 600, WRAP, WRAP);
+        amountLabel.setGravity(1);
+        centerX(pg, amountLabel, 0, 600, 1000, 90);
 
         amountInput = numInp();
         amountInput.setTextSize(20);
-        centerX(pg, amountInput, 0, 700, 360, WRAP);       // กว้าง 360 เหมือนช่องกรอกใน Screen_2
+        centerX(pg, amountInput, 0, 700, 360, 150);       // กว้าง 360 เหมือนช่องกรอกใน Screen_2
         setTxt(amountInput, "" + Math.round(oldLiter * 1000));
 
         // เวลาใหม่
         Txt timeLabel = txt("เวลา");
         timeLabel.setTextSize(20);
         bold(timeLabel);
-        centerX(pg, timeLabel, 0, 850, WRAP, WRAP);
+        timeLabel.setGravity(1);
+        centerX(pg, timeLabel, 0, 850, 1000, 90);
         // ชั่วโมง
         hourInput = numInp();
         hourInput.setTextSize(20);
         hourInput.setInputType(android.text.InputType.TYPE_CLASS_NUMBER);
-        put(pg, hourInput, 250, 1000, 140, WRAP);
+        put(pg, hourInput, 250, 1000, 140, 150);
 
         Txt HourText = txt("ชั่วโมง");
         HourText.setTextSize(20);
-        put(pg, HourText,400, 1000, WRAP, WRAP);
+        put(pg, HourText,400, 1000, 200, 90);
         // นาที
         minuteInput = numInp();
         minuteInput.setTextSize(20);
         minuteInput.setInputType(android.text.InputType.TYPE_CLASS_NUMBER);
-        put(pg, minuteInput, 650, 1000, 140, WRAP);
+        put(pg, minuteInput, 650, 1000, 140, 150);
 
         Txt MinuteText = txt("นาที");
         MinuteText.setTextSize(20);
-        put(pg, MinuteText,800, 1000, WRAP, WRAP);
+        put(pg, MinuteText,800, 1000, 200, 90);
 
         msgTxt = txt("");
         msgTxt.setTextSize(25);
         bold(msgTxt);
-        centerX(pg, msgTxt, 0, 1400, WRAP, WRAP);
+        msgTxt.setGravity(1);
+        centerX(pg, msgTxt, 0, 1400, 1000, 110);
 
         setTxt(hourInput, oldDrink[7]);
         setTxt(minuteInput, oldDrink[8]);
 
         // ปุ่มลบประวัติ
         Img deleteButton = imgBtn(R.drawable.b_delete);
-        put(pg, deleteButton, 120, 1200, WRAP, WRAP);
+        put(pg, deleteButton, 120, 1200, 400, 130);
         onTap(deleteButton,() ->deleteHistory());
 
         // ปุ่ม Submit
         Img submitButton = imgBtn(R.drawable.b_ok);
-        put(pg, submitButton, 560, 1200, WRAP, WRAP);
+        put(pg, submitButton, 560, 1200, 400, 130);
         onTap(submitButton,() -> submit());
     }
 

@@ -33,12 +33,13 @@ public class Screen_3 extends BaseClass {
 
         Img back = imgBtn(R.drawable.b_back);                 // กลับ Screen_2
         onTap(back, () -> finish());
-        put(pg, back, 30, 30, WRAP, WRAP);
+        put(pg, back, 30, 30, 280, 120);
 
         Txt title = txt("เติมน้ำให้หยดน้ำ");
         title.setTextSize(24);
         bold(title);
-        centerX(pg, title, 0, 190, WRAP, WRAP);
+        title.setGravity(1);                                  // 1 = ตรงกลางแนวนอน
+        centerX(pg, title, 0, 190, 1000, 100);
 
         Img p = img();                                        // หยดน้ำตรงกลาง
         setImg(p, pic);
@@ -47,13 +48,15 @@ public class Screen_3 extends BaseClass {
         Txt count = txt("💧 " + days + " วันต่อเนื่อง");       // ยอดวันต่อเนื่อง
         count.setTextSize(24);
         bold(count);
-        centerX(pg, count, 0, 960, WRAP, WRAP);
+        count.setGravity(1);
+        centerX(pg, count, 0, 960, 1000, 100);
 
         Txt status = txt("");
         if (days < NEED) setTxt(status, "อีก " + (NEED - days) + " วัน หยดน้ำจะหายเศร้า");
         else if (doneToday) setTxt(status, "วันนี้เติมน้ำแล้ว เจอกันพรุ่งนี้นะ");
         else setTxt(status, "วันนี้ยังไม่ได้เติมน้ำ อย่าให้หยดน้ำร้องไห้นะ");
-        centerX(pg, status, 0, 1050, WRAP, WRAP);
+        status.setGravity(1);
+        centerX(pg, status, 0, 1050, 1000, 80);
 
         // เงื่อนไขเลี้ยงหยดน้ำ
         Col rule = col();
@@ -61,9 +64,9 @@ public class Screen_3 extends BaseClass {
         rule.setPadding(40, 30, 40, 30);
         Txt rTitle = txt("💧 เลี้ยงหยดน้ำให้สดชื่นทุกวัน");
         bold(rTitle);
-        add(rule, rTitle, WRAP, WRAP);
-        add(rule, txt("• บันทึกการดื่มน้ำอย่างน้อยวันละ 1 ครั้ง"), WRAP, WRAP);
-        put(pg, rule, 30, 1150, 1020, WRAP);
+        add(rule, rTitle, 940, 80);
+        add(rule, txt("• บันทึกการดื่มน้ำอย่างน้อยวันละ 1 ครั้ง"), 940, 80);
+        put(pg, rule, 30, 1150, 1020, 220);                   // 2 บรรทัด × 80 + ขอบบนล่าง 30
     }
 
     // ===== ระบบ streak =====

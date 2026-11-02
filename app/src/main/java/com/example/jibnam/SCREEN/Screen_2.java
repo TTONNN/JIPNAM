@@ -49,34 +49,38 @@ public class Screen_2 extends BaseClass {
         // ===== ปุ่มด้านบน 2 แถว แถวละ 2 ปุ่ม กว้างเท่ากัน =====
         Img toS1 = imgBtn(R.drawable.b_profile);         // แก้ไขข้อมูลส่วนตัว
         onTap(toS1, () -> go(Screen_1.class));
-        put(pg, toS1, 30, 30, WRAP, WRAP);
+        put(pg, toS1, 30, 30, 500, 130);                // ทุกปุ่มรูป = ขนาดเท่ารูป (px)
         Img toS6 = imgBtn(R.drawable.b_summary);         // สรุปการดื่มน้ำ
         onTap(toS6, () -> go(Screen_6.class));
-        put(pg, toS6, 550, 30, WRAP, WRAP);
+        put(pg, toS6, 550, 30, 500, 130);
 
         notiBtn = imgBtn(R.drawable.b_noti_on);                       // กดสลับ เปิด/ปิด แล้วเซฟลงไฟล์
         onTap(notiBtn, () -> {
             data.setNoti(!data.notiOn());
             showNoti();
         });
-        put(pg, notiBtn, 30, 175, WRAP, WRAP);
+        put(pg, notiBtn, 30, 175, 500, 130);
         showNoti();
         Img testBtn = imgBtn(R.drawable.b_test);      // กด 1 ครั้ง = เด้ง 1 ข้อความ ไล่ครบแล้ววนใหม่
         onTap(testBtn, () -> testNoti());
-        put(pg, testBtn, 550, 175, WRAP, WRAP);
+        put(pg, testBtn, 550, 175, 500, 130);
 
         // ===== ข้อมูล + รูปขวด อยู่กลางจอ =====
-        centerX(pg, txt("น้ำหนัก " + fmt(wtKg) + " กก.    ควรดื่ม " + WaterCalculate.L(tgL)), 0, 335, WRAP, WRAP);
+        Txt infoTx = txt("น้ำหนัก " + fmt(wtKg) + " กก.    ควรดื่ม " + WaterCalculate.L(tgL));
+        infoTx.setGravity(1);                            // 1 = ตรงกลางแนวนอน
+        centerX(pg, infoTx, 0, 335, 1000, 80);
         drankTx = txt("");
         drankTx.setTextSize(20);
         bold(drankTx);
-        centerX(pg, drankTx, 0, 405, WRAP, WRAP);
+        drankTx.setGravity(1);
+        centerX(pg, drankTx, 0, 405, 1000, 90);
 
         btlImg = img();
         centerX(pg, btlImg, 0, 490, 390, 540);
         pctTx = txt("");
         bold(pctTx);
-        centerX(pg, pctTx, 0, 790, WRAP, WRAP);  // ทับกลางขวด
+        pctTx.setGravity(1);
+        centerX(pg, pctTx, 0, 790, 1000, 80);  // ทับกลางขวด
 
         streakImg = imgBtn(R.drawable.ch_cry);           // หยดน้ำ Streak ขวาของขวด กดแล้วไป Screen_3
         onTap(streakImg, () -> go(Screen_3.class));
@@ -86,11 +90,12 @@ public class Screen_2 extends BaseClass {
         bold(streakTx);
         streakTx.setGravity(1);                          // 1 = ตรงกลางแนวนอน
         onTap(streakTx, () -> go(Screen_3.class));
-        put(pg, streakTx, 810, 800, 230, WRAP);
+        put(pg, streakTx, 810, 800, 230, 100);
 
         plusTx = txt("");                        // "เพิ่มน้ำ : +115 ml สำเร็จ" ว่างตอนแรก
         bold(plusTx);
-        centerX(pg, plusTx, 0, 1045, WRAP, WRAP);
+        plusTx.setGravity(1);
+        centerX(pg, plusTx, 0, 1045, 1000, 80);
 
         // ===== ปุ่มภาชนะ 3 ปุ่มแถวเดียว กว้าง 240 ห่างกัน 60 อยู่กลางจอ =====
         for (int i = 0; i < CUP_ML.length; i++) {
@@ -99,22 +104,22 @@ public class Screen_2 extends BaseClass {
 
         // ===== ช่องกรอก ml + submit แถวเดียวกัน =====
         amtIn = numInp();
-        put(pg, amtIn, 150, 1415, 360, WRAP);
-        put(pg, txt("ml"), 525, 1455, WRAP, WRAP);
+        put(pg, amtIn, 150, 1415, 360, 140);
+        put(pg, txt("ml"), 525, 1455, 100, 80);
         Img subBtn = imgBtn(R.drawable.b_save);         // บันทึก
         onTap(subBtn, () -> submit());
-        put(pg, subBtn, 650, 1400, WRAP, WRAP);
+        put(pg, subBtn, 650, 1400, 400, 130);
 
         // ===== ประวัติวันนี้ =====
         Txt hisTitle = txt("ประวัติ (วันนี้)");
         bold(hisTitle);
-        put(pg, hisTitle, 30, 1610, WRAP, WRAP);
+        put(pg, hisTitle, 30, 1610, 500, 80);
         Img moreBtn = imgBtn(R.drawable.b_history);     // Water History
         onTap(moreBtn, () -> go(Screen_4.class));
-        put(pg, moreBtn, 600, 1580, WRAP, WRAP);
+        put(pg, moreBtn, 600, 1580, 450, 130);
 
         hisBox = box();                          // กล่องประวัติ (วาดใหม่ใน refresh)
-        put(pg, hisBox, 0, 1730, WRAP, WRAP);
+        put(pg, hisBox, 0, 1730, 1050, 0);         // สูงจริงตั้งใน refresh() = จำนวนแถว × 168
 
         amtIn.setText("" + CUP_ML[0]);  // เริ่มต้นใส่ปริมาณภาชนะแรก
         refresh();
@@ -154,6 +159,7 @@ public class Screen_2 extends BaseClass {
             hisCard(row, d[0], WaterCalculate.ml(l) + "   เวลา " + hm(d[7], d[8]));
             row++;
         }
+        size(hisBox, 1050, row * 168);                             // กล่องประวัติสูงเท่าจำนวนแถว (แถวละ 168)
         drankTx.setText("ดื่มแล้ว " + WaterCalculate.L(drkL) + " / " + WaterCalculate.L(tgL));
         btlImg.setImageResource(BTL[pct() / 10]);  // รูปเปลี่ยนทีละ 10%
         pctTx.setText(pctTxt());          // % ทศนิยม 2 ตำแหน่ง
@@ -188,7 +194,7 @@ public class Screen_2 extends BaseClass {
 
     void cupBtn(Box pg, int i, int x, int y) {   // ปุ่มภาชนะที่ i ที่ (x, y): กดแล้วเติมปริมาณ (ml) ในช่องกรอก
         Img b = imgBtn(CUP_IMG[i]);
-        put(pg, b, x, y, WRAP, WRAP);
+        put(pg, b, x, y, 240, 270);              // ขนาดเท่ารูปปุ่มภาชนะ
         onTap(b, () -> amtIn.setText("" + CUP_ML[i]));
     }
 
@@ -205,10 +211,10 @@ public class Screen_2 extends BaseClass {
     void hisCard(int row, String sn, String s) {   // ประวัติแถวที่ row: กรอบสูง 150 ห่างกันแถวละ 168 (sn = serial ของแก้ว)
         Box c = box();
         border(c);
-        put(c, txt(s), 30, 42, WRAP, WRAP);                     // ข้อความซ้าย
+        put(c, txt(s), 30, 42, 700, 80);                        // ข้อความซ้าย
         Img edBtn = imgBtn(R.drawable.b_edit);
         onTap(edBtn, () -> goWith(Screen_5.class, "serial", sn));   // ส่ง serial ไปหน้า 5
-        put(c, edBtn, 760, 20, WRAP, WRAP);                      // ปุ่มแก้ไขขวา
+        put(c, edBtn, 760, 20, 240, 110);                        // ปุ่มแก้ไขขวา
         put(hisBox, c, 30, row * 168, 1020, 150);
     }
 

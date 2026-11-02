@@ -39,11 +39,12 @@ public class Screen_4 extends BaseClass {
         Txt head = txt("Water History");                  // หัวบนสุดของหน้า
         head.setTextSize(24);
         bold(head);
-        centerX(pg, head, 0, 40, WRAP, WRAP);
+        head.setGravity(1);                               // 1 = ตรงกลางแนวนอน
+        centerX(pg, head, 0, 40, 1000, 100);
 
         Img Back = imgBtn(R.drawable.b_back);
         onTap(Back, () -> finish());                      // ปิดหน้านี้ กลับ Screen_2 หน้าเดิม
-        put(pg, Back, 30, 170, WRAP, WRAP);
+        put(pg, Back, 30, 170, 280, 120);
 
         cal = new CalendarMonth(month, year); // แสดงที่ปัจจุบันเสมอ
         data = new Data(DataApi.realDataFile(this)); //อ่านไฟล์
@@ -56,8 +57,8 @@ public class Screen_4 extends BaseClass {
 
         Img prev = imgBtn(R.drawable.b_prev);             // ปุ่มรูปลูกศร
         Img next = imgBtn(R.drawable.b_next);
-        put(pg, prev, 30, 325, WRAP, WRAP);
-        put(pg, next, 930, 325, WRAP, WRAP);
+        put(pg, prev, 30, 325, 120, 120);
+        put(pg, next, 930, 325, 120, 120);
 
         onTap(prev, () -> {
             cal.previousMonth();
@@ -77,7 +78,7 @@ public class Screen_4 extends BaseClass {
         Txt lt = txt("สีในปฏิทินหมายถึง");
         lt.setTextSize(20);
         bold(lt);
-        put(pg, lt, 30, ly, WRAP, WRAP);
+        put(pg, lt, 30, ly, 1000, 90);
         legend(pg, ly + 75, "🟦 สีฟ้า = ดื่มเยอะ (120% ขึ้นไป)");
         legend(pg, ly + 145, "🟩 สีเขียว = ดื่มครบแล้ว (100% - 119%)");
         legend(pg, ly + 215, "🟨 สีเหลือง = ดื่มไปแล้วครึ่งนึง (50% - 99%)");
@@ -86,7 +87,7 @@ public class Screen_4 extends BaseClass {
 
         summary = txt("");                                // สรุปเดือน ต่อบรรทัดจากคำอธิบายสี อยู่ตลอด
         summary.setTextSize(18);
-        put(pg, summary, 40, ly + 430, 1000, WRAP);
+        put(pg, summary, 40, ly + 430, 1000, 290);        // 4 บรรทัด
 
         detail = txt("");                                 // วันที่กด ว่างไว้ก่อน
         detail.setTextSize(18);
@@ -97,7 +98,7 @@ public class Screen_4 extends BaseClass {
         // ===== ล่างสุดชิดซ้าย: ปุ่มดาวน์โหลด + กล่องวิธีอ่านไฟล์ =====
         Img dlBtn = imgBtn(R.drawable.b_download);
         onTap(dlBtn, () -> DataApi.download(this));       // copy RealData.txt ไปที่ Download (DATA/DataApi)
-        put(pg, dlBtn, 30, ly + 1030, WRAP, WRAP);
+        put(pg, dlBtn, 30, ly + 1030, 640, 130);
 
         Col how = col();                                  // กล่องวิธีอ่านไฟล์ ตัวเล็ก 16
         border(how, 0xFFF4F9FF);                          // กรอบ พื้นฟ้าอ่อนมาก
@@ -105,7 +106,7 @@ public class Screen_4 extends BaseClass {
         Txt hTitle = txt("📄 วิธีอ่านไฟล์ RealData.txt");
         hTitle.setTextSize(16);
         bold(hTitle);
-        add(how, hTitle, WRAP, WRAP);
+        add(how, hTitle, 948, 70);
         String[] lines = {                                // 1 ข้อความ = 1 บรรทัดใหม่เสมอ (Col เรียงลง)
                 "[ บรรทัด = บันทึก 1 ครั้ง ข้อมูลคั่นด้วย ; ]",
                 "1. เวลาบันทึก (ปี เดือน วัน ชั่วโมง นาที วินาที)",
@@ -122,9 +123,9 @@ public class Screen_4 extends BaseClass {
         for (int i = 0; i < lines.length; i++) {
             Txt t = txt(lines[i]);
             t.setTextSize(16);
-            add(how, t, WRAP, WRAP);
+            add(how, t, 948, 70);
         }
-        put(pg, how, 30, ly + 1190, 1020, WRAP);
+        put(pg, how, 30, ly + 1190, 1020, 888);           // 12 บรรทัด × 70 + ขอบบนล่าง 24
 
         updateCalendar();
     }
@@ -144,7 +145,7 @@ public class Screen_4 extends BaseClass {
     void legend(Box pg, int y, String text) {             // คำอธิบายสี 1 แถว: อีโมจิสี + ข้อความ
         Txt t = txt(text);
         t.setTextSize(18);
-        put(pg, t, 40, y, WRAP, WRAP);
+        put(pg, t, 40, y, 1000, 70);
     }
 
     void updateCalendar() {

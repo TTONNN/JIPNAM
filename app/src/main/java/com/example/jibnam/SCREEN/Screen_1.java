@@ -24,20 +24,22 @@ public class Screen_1 extends BaseClass {
         Txt title = txt("JIBNAM");
         title.setTextSize(48);
         bold(title);
-        centerX(pg, title, 0, 0, WRAP, WRAP);
+        title.setGravity(1);                                  // 1 = ตรงกลางแนวนอน
+        centerX(pg, title, 0, 0, 1000, 200);
 
         // น้ำหนักตัว
         Txt weightLabel = txt("น้ำหนักตัว (กิโลกรัม)");
         weightLabel.setTextSize(20);
         bold(weightLabel);
-        centerX(pg, weightLabel, 0, 220, WRAP, WRAP);
+        weightLabel.setGravity(1);
+        centerX(pg, weightLabel, 0, 220, 1000, 90);
 
         weightInput = numInp();
-        centerX(pg, weightInput, 0, 300, 360, WRAP);          // กว้าง 360 เหมือนช่องกรอกใน Screen_2
+        centerX(pg, weightInput, 0, 300, 360, 140);          // กว้าง 360 เหมือนช่องกรอกใน Screen_2
 
         // ปุ่มคำนวณ
         Img calculateButton = imgBtn(R.drawable.b_calc);
-        centerX(pg, calculateButton, 0, 450, WRAP, WRAP);
+        centerX(pg, calculateButton, 0, 450, 360, 130);      // ขนาดเท่ารูป b_calc
 
         onTap(calculateButton, () -> calculateTarget());
 
@@ -46,32 +48,34 @@ public class Screen_1 extends BaseClass {
         targetDrinkText = txt("ปริมาณน้ำที่แนะนำจะแสดงที่นี่");
         targetDrinkText.setTextSize(20);
         bold(targetDrinkText);
-        centerX(pg, targetDrinkText, 0, 650, WRAP, WRAP);
+        targetDrinkText.setGravity(1);
+        centerX(pg, targetDrinkText, 0, 650, 1000, 90);
         // เวลาตื่นนอน
 
         Txt wakeLabel = txt("เวลาตื่นนอน");
         wakeLabel.setTextSize(20);
         bold(wakeLabel);
-        centerX(pg, wakeLabel, 0, 800, WRAP, WRAP);
+        wakeLabel.setGravity(1);
+        centerX(pg, wakeLabel, 0, 800, 1000, 90);
 
         // ชั่วโมงตื่นนอน
         wakeHourInput = numInp();
         wakeHourInput.setInputType(android.text.InputType.TYPE_CLASS_NUMBER);
-        put(pg, wakeHourInput, 250, 1000, 140, WRAP);
+        put(pg, wakeHourInput, 250, 1000, 140, 140);
 
 
         Txt wakeHourText = txt("ชั่วโมง");
         wakeHourText.setTextSize(18);
-        put(pg, wakeHourText,400, 1000, WRAP, WRAP);
+        put(pg, wakeHourText,400, 1000, 150, 80);
 
         // นาทีตื่นนอน
         wakeMinuteInput = numInp();
         wakeMinuteInput.setInputType(android.text.InputType.TYPE_CLASS_NUMBER);
-        put(pg, wakeMinuteInput, 550, 1000, 140, WRAP);
+        put(pg, wakeMinuteInput, 550, 1000, 140, 140);
 
         Txt wakeMinuteText = txt("นาที");
         wakeMinuteText.setTextSize(18);
-        put(pg, wakeMinuteText, 700, 1000, WRAP, WRAP);
+        put(pg, wakeMinuteText, 700, 1000, 150, 80);
 
 
         // เวลาเข้านอน
@@ -79,17 +83,18 @@ public class Screen_1 extends BaseClass {
         Txt sleepLabel = txt("เวลาเข้านอน");
         sleepLabel.setTextSize(20);
         bold(sleepLabel);
-        centerX(pg, sleepLabel, 0, 1200, WRAP, WRAP);
+        sleepLabel.setGravity(1);
+        centerX(pg, sleepLabel, 0, 1200, 1000, 90);
 
 
         // ชั่วโมงเข้านอน
         sleepHourInput = numInp();
         sleepHourInput.setInputType(android.text.InputType.TYPE_CLASS_NUMBER);
-        put(pg, sleepHourInput, 250, 1400, 140, WRAP);
+        put(pg, sleepHourInput, 250, 1400, 140, 140);
 
         Txt sleepHourText = txt("ชั่วโมง");
         sleepHourText.setTextSize(18);
-        put(pg, sleepHourText, 400, 1400, WRAP, WRAP);
+        put(pg, sleepHourText, 400, 1400, 150, 80);
 
 
         // นาทีเข้านอน
@@ -97,11 +102,11 @@ public class Screen_1 extends BaseClass {
         sleepMinuteInput.setInputType(
                 android.text.InputType.TYPE_CLASS_NUMBER
         );
-        put(pg, sleepMinuteInput, 550, 1400, 140, WRAP);
+        put(pg, sleepMinuteInput, 550, 1400, 140, 140);
 
         Txt sleepMinuteText = txt("นาที");
         sleepMinuteText.setTextSize(18);
-        put(pg, sleepMinuteText, 700, 1400, WRAP, WRAP);
+        put(pg, sleepMinuteText, 700, 1400, 150, 80);
 
 
         // =========================
@@ -109,7 +114,7 @@ public class Screen_1 extends BaseClass {
         // =========================
 
         Img submitButton = imgBtn(R.drawable.b_start);
-        centerX(pg, submitButton, 0, 1550, WRAP, WRAP);
+        centerX(pg, submitButton, 0, 1550, 520, 140);        // ขนาดเท่ารูป b_start
 
         onTap(submitButton, () -> submit());
     }
